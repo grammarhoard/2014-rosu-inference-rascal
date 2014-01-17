@@ -1,0 +1,75 @@
+// Sample Set 1
+addSample("1",   true);
+addSample("110", true);
+addSample("01",  true);
+addSample("001", true);
+
+addSample("00",  false);
+addSample("10",  false);
+addSample("000", false);
+-----------------------------
+APTANode(
+  "root",
+  (
+    "1":Node(
+      "Accepted",
+      (
+        "1":Node(
+          "",
+          ("0":Node(
+              "Accepted",
+              ()))),
+        "0":Node(
+          "Rejected",
+          ())
+      )),
+    "0":Node(
+      "",
+      (
+        "1":Node(
+          "Accepted",
+          ()),
+        "0":Node(
+          "Rejected",
+          (
+            "1":Node(
+              "Accepted",
+              ()),
+            "0":Node(
+              "Rejected",
+              ())
+          ))
+      ))
+  ))
+-----------------------------
+addSample("1",    true);
+addSample("11",   true);
+addSample("1111", true);
+
+addSample("0",    false);
+addSample("101",  false);
+-----------------------------
+APTANode(
+  "root",
+  (
+    "1":Node(
+      "Accepted",
+      (
+        "1":Node(
+          "Accepted",
+          ("1":Node(
+              "",
+              ("1":Node(
+                  "Accepted",
+                  ()))))),
+        "0":Node(
+          "",
+          ("1":Node(
+              "Rejected",
+              ())))
+      )),
+    "0":Node(
+      "Rejected",
+      ())
+  ))
+
