@@ -3,106 +3,55 @@
  */
 module Exbar
 
+import TrainingSet;
 import APTA;
+import GraphVis;
 
-import IO;
+// import IO;
 
-/**
- * Set of positive example strings
- */
-private set[str] positiveSamples = {};
-
-/**
- * Set of negative example strings
- */
-private set[str] negativeSamples = {};
+// Maximum number of red nodes
+private int maxRed;
 
 /**
- * START point
+ * STARTing point
  */
 public void main()
 {
     // Add positive and negative samples
     /* Sample Set 1
-    addSample("1",   true);
-    addSample("110", true);
-    addSample("01",  true);
-    addSample("001", true);
+    TrainingSet::addSample("1",   true);
+    TrainingSet::addSample("110", true);
+    TrainingSet::addSample("01",  true);
+    TrainingSet::addSample("001", true);
 
-    addSample("00",  false);
-    addSample("10",  false);
-    addSample("000", false);
+    TrainingSet::addSample("00",  false);
+    TrainingSet::addSample("10",  false);
+    TrainingSet::addSample("000", false);
     */
     /* Sample Set 2
-    addSample("1",    true);
-    addSample("11",   true);
-    addSample("1111", true);
+    TrainingSet::addSample("1",    true);
+    TrainingSet::addSample("11",   true);
+    TrainingSet::addSample("1111", true);
 
-    addSample("0",    false);
-    addSample("101",  false);
+    TrainingSet::addSample("0",    false);
+    TrainingSet::addSample("101",  false);
     */
     // Sample Set 3
-    addSample("a",    true);
-    addSample("abaa", true);
-    addSample("bb",   true);
+    TrainingSet::addSample("a",    true);
+    TrainingSet::addSample("abaa", true);
+    TrainingSet::addSample("bb",   true);
 
-    addSample("abb",  false);
-    addSample("b",    false);
+    TrainingSet::addSample("abb",  false);
+    TrainingSet::addSample("b",    false);
 
     /* Other Samples
-    // addSampleFromFile(|file:///home/orosu/Documents/workspaces/eclipse/Exbar/src/Exbar.rsc|, true);
-    // addSampleFromDirectory(|file:///home/orosu/Documents/workspaces/eclipse/Exbar/src|, true);
+    // TrainingSet::addSampleFromFile(|file:///home/orosu/Documents/workspaces/eclipse/Exbar/src/Exbar.rsc|, true);
+    // TrainingSet::addSampleFromDirectory(|file:///home/orosu/Documents/workspaces/eclipse/Exbar/src|, true);
     */
 
-    // Build APTA
-    buildAPTA();
-}
+    maxRed = 1;
+    APTA::build();
+    GraphVis::build();
 
-/**
- * Add sample to set
- */
-private void addSample(str sample, bool sampleType)
-{
-    if (sampleType == true) {
-        positiveSamples += sample;
-    } else {
-        negativeSamples += sample;
-    }
-}
-
-/**
- * Add Sample from file
- */
-private void addSampleFromFile(loc fileLocation, bool sampleType)
-{
-    if (!exists(fileLocation)) {
-        throw "File <fileLocation> does not exist!";
-    }
-    addSample(readFile(fileLocation), sampleType);
-}
-
-/**
- * Add Sample from directory
- */
-private void addSampleFromDirectory(loc directoryLocation, bool sampleType)
-{
-    if (!isDirectory(directoryLocation)) {
-        throw "Directory <directoryLocation> is not a directory!";
-    }
-    for (str entry <- listEntries(directoryLocation)) {
-        if (isDirectory(directoryLocation + entry)) {
-            addSampleFromDirectory(directoryLocation + entry, sampleType);
-        } else {
-            addSampleFromFile(directoryLocation + entry, sampleType);
-        }
-    }
-}
-
-/**
- * Build APTA
- */
-private void buildAPTA()
-{
-    APTree tree0 = APTA::build(positiveSamples, negativeSamples);
-    print("APTA"); iprintln(tree0);
+    // Search 
 }

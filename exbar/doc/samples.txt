@@ -1,107 +1,18 @@
-// Sample Set 1
-addSample("1",   true);
-addSample("110", true);
-addSample("01",  true);
-addSample("001", true);
-
-addSample("00",  false);
-addSample("10",  false);
-addSample("000", false);
------------------------------
-APTANode(
-  "root",
-  (
-    "1":Node(
-      "Accepted",
-      (
-        "1":Node(
-          "",
-          ("0":Node(
-              "Accepted",
-              ()))),
-        "0":Node(
-          "Rejected",
-          ())
-      )),
-    "0":Node(
-      "",
-      (
-        "1":Node(
-          "Accepted",
-          ()),
-        "0":Node(
-          "Rejected",
-          (
-            "1":Node(
-              "Accepted",
-              ()),
-            "0":Node(
-              "Rejected",
-              ())
-          ))
-      ))
-  ))
------------------------------
-// Sample Set 2
-addSample("1",    true);
-addSample("11",   true);
-addSample("1111", true);
-
-addSample("0",    false);
-addSample("101",  false);
------------------------------
-APTANode(
-  "root",
-  (
-    "1":Node(
-      "Accepted",
-      (
-        "1":Node(
-          "Accepted",
-          ("1":Node(
-              "",
-              ("1":Node(
-                  "Accepted",
-                  ()))))),
-        "0":Node(
-          "",
-          ("1":Node(
-              "Rejected",
-              ())))
-      )),
-    "0":Node(
-      "Rejected",
-      ())
-  ))
------------------------------
 // Sample Set 3
-addSample("a",    true);
-addSample("abaa", true);
-addSample("bb",   true);
+TrainingSet::addSample("a",    true);
+TrainingSet::addSample("abaa", true);
+TrainingSet::addSample("bb",   true);
 
-addSample("abb",  false);
-addSample("b",    false);
+TrainingSet::addSample("abb",  false);
+TrainingSet::addSample("b",    false);
 -----------------------------
-APTANode(
-  "root",
-  (
-    "b":Node(
-      "Rejected",
-      ("b":Node(
-          "Accepted",
-          ()))),
-    "a":Node(
-      "Accepted",
-      ("b":Node(
-          "",
-          (
-            "b":Node(
-              "Rejected",
-              ()),
-            "a":Node(
-              "",
-              ("a":Node(
-                  "Accepted",
-                  ())))
-          ))))
-  ))
+Red Nodes("root":"")
+Blue Nodes("Node-7":"Rejected","Node-6":"Accepted","Node-5":"Rejected","Node-4":"Accepted","Node-3":"","Node-2":"","Node-1":"Accepted")
+Node Edges(
+  "Node-5":("b":"Node-6"),
+  "Node-3":("a":"Node-4"),
+  "Node-2":("b":"Node-7","a":"Node-3"),
+  "Node-1":("b":"Node-2"),
+  "root":("b":"Node-5","a":"Node-1"),
+  "":("":"root")
+)

@@ -1,64 +1,113 @@
 /**
  * Augmented Prefix Tree Acceptor (APTA) Module
+ * APTA(S+, S-) A = <Q, Z, d, s, F+, F-> where
+ *     S+ = set of positive samples
+ *     S- = set of negative samples
+ *     Q = finite non-empty set of nodes
+ *     Sigma Z = finite non-empty set of input symbols (alphabet)
+ *     delta d : Q x Z -> Q = transition function
+ *     s (element of) Q = start (root node)
+ *     F+ (subset of) Q = final nodes of strings in S+
+ *     F- (subset of) Q = final nodes of strings in S-
+ * size(A) = |Q| (total number of elements in Q / total number of nodes)
+ * APTA is built from the beginning in the red-blue framework
  */
 module APTA
+
+import TrainingSet;
 
 // import IO;
 import String;
 
 /**
- * Augmented Prefix Tree Acceptor Data Type
+ * Map of Red Nodes
  */
-data APTree = Node(str nodeLabel, map[str edgeLabel, APTree child] children);
+public map[str id, str label] redNodes = ();
 
 /**
- * Default tree with just the root node
+ * Map of Blue Nodes
  */
-private APTree tree0 = Node("root", ());
+public map[str id, str label] blueNodes = ();
 
 /**
- * Build APTA starting with tree0 (root node) from positive and negative samples
+ * List of Edges between nodes (red and blue)
  */
-public APTree build(set[str] positiveSamples, set[str] negativeSamples)
+public map[str sourceId, map[str label, str destId] sourceEdges] nodeEdges = ();
+
+/**
+ * Root Id
+ */
+public str rootId = "root";
+
+/**
+ * Node Id Auto Increment
+ */
+private int nodeIdAutoIncrement = 0;
+
+/**
+ * Get an unique node id
+ */
+private str getUniqueNodeId()
 {
-    for (str sample <- positiveSamples) {
-        tree0 = addPath(tree0, sample, "Accepted");
+    nodeIdAutoIncrement+=1;
+    return "Node-<nodeIdAutoIncrement>";
+}
+
+/**
+ * Add New Node
+ */
+private void addNewNode(bool isRed, str newNodeId, str nodeLabel,
+    str parentNodeId, str edgeLabel
+){
+    if (isRed) {
+        redNodes += (newNodeId: nodeLabel);
+    } else {
+        blueNodes += (newNodeId: nodeLabel);
     }
-    for (str sample <- negativeSamples) {
-        tree0 = addPath(tree0, sample, "Rejected");
+    if (parentNodeId == "" || parentNodeId notin nodeEdges) {
+        nodeEdges += (parentNodeId: (edgeLabel: newNodeId));
+    } else {
+        nodeEdges[parentNodeId] += (edgeLabel: newNodeId);
     }
-    return tree0;
 }
 
 /**
  * Add path to the tree (goes recursively until the sample is consumed)
  */
-private APTree addPath(APTree treeL, str sample, str terminalNodeLabel)
+private str addPath(str nodeId, str sample, str terminalNodeLabel)
 {
-    // Match first node of the local tree to get the first children
-    if (Node(nodeLabel, children) := treeL) {
-
-        // Terminal Node
-        if (sample == "") {
-            return Node(terminalNodeLabel, children);
-        }
-
-        str sampleRest = size(sample) > 1 ? sample[1..] : "";
-        str nodeLabelL = size(sampleRest) == 0 ? terminalNodeLabel : "";
-
-        if (sample[0] notin children) {
-            return Node(nodeLabel, children +
-                // Add new child tree
-                (sample[0]: addPath( Node(nodeLabelL, ()), sampleRest, terminalNodeLabel) )
-            );
-        } else {
-            return Node(nodeLabel, (children - (sample[0]: Node("", ())))+
-                // Update child tree
-                (sample[0]: addPath( children[sample[0]], sampleRest, terminalNodeLabel) )
-            );
-        }
-    } else {
-        throw "The tree did NOT match (<treeL>)!";
+    // Terminal Node
+    if (sample == "") {
+        blueNodes[nodeId] = terminalNodeLabel;
+        return nodeId;
     }
+
+    str sampleRest = size(sample) > 1 ? sample[1..] : "";
+    str nodeLabelL = size(sampleRest) == 0 ? terminalNodeLabel : "";
+    str nodeIdL = ""; //TODO Don't need it but Rascal gives error otherwise
+
+    // Check if the first character of the sample exists or not as a path
+    if (nodeId notin nodeEdges || sample[0] notin nodeEdges[nodeId]) {
+        // Create path
+        nodeIdL = getUniqueNodeId();
+        addNewNode(false, nodeIdL, nodeLabelL, nodeId, sample[0]);
+    } else {
+        // Update path
+        nodeIdL = nodeEdges[nodeId][sample[0]];
+    }
+
+    return addPath(nodeIdL, sampleRest, terminalNodeLabel);
 }
 
+/**
+ * Build APTA from Training Set starting with the Root Node
+ */
+public void build()
+{
+    // Start with the root of APTA colored red
+    addNewNode(true, rootId, "", "", "");
+
+    for (tuple[str valueL, bool typeL] sample <- TrainingSet::trainingSet0) {
+        addPath(rootId, sample.valueL, sample.typeL ? "Accepted" : "Rejected");
+    }
+}
