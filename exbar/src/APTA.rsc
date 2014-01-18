@@ -57,6 +57,8 @@ private APTree addPath(APTree treeL, str sample, str terminalNodeLabel)
                 (sample[0]: addPath( children[sample[0]], sampleRest, terminalNodeLabel) )
             );
         }
+    } else {
+        throw "The tree did NOT match (<treeL>)!";
     }
 }
 

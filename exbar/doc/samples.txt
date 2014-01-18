@@ -42,6 +42,7 @@ APTANode(
       ))
   ))
 -----------------------------
+// Sample Set 2
 addSample("1",    true);
 addSample("11",   true);
 addSample("1111", true);
@@ -72,4 +73,35 @@ APTANode(
       "Rejected",
       ())
   ))
+-----------------------------
+// Sample Set 3
+addSample("a",    true);
+addSample("abaa", true);
+addSample("bb",   true);
 
+addSample("abb",  false);
+addSample("b",    false);
+-----------------------------
+APTANode(
+  "root",
+  (
+    "b":Node(
+      "Rejected",
+      ("b":Node(
+          "Accepted",
+          ()))),
+    "a":Node(
+      "Accepted",
+      ("b":Node(
+          "",
+          (
+            "b":Node(
+              "Rejected",
+              ()),
+            "a":Node(
+              "",
+              ("a":Node(
+                  "Accepted",
+                  ())))
+          ))))
+  ))
