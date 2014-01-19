@@ -25,14 +25,29 @@ import String;
 public map[str id, str label] redNodes = ();
 
 /**
+ * Red Nodes Label List
+ * Used by Exbar algorithm (pickBlueNode)
+ */
+public list[str] redNodesLabelList = [];
+
+/**
  * Map of Blue Nodes
  */
 public map[str id, str label] blueNodes = ();
 
 /**
- * List of Edges between nodes (red and blue)
+ * Map of Edges between nodes Source -> Destination (for both, red and blue)
+ * Used to get the children of a node
  */
-public map[str sourceId, map[str label, str destId] sourceEdges] nodeEdges = ();
+public map[str sourceId, set[tuple[str nodeLabel, str destId]
+                                  nodeEdge] nodeEdges] nodeEdges = ();
+
+/**
+ * Map of Edges between nodes Destination -> Source (for both, red and blue)
+ * Used to get the parrents of a node
+ */
+public map[str destId, set[tuple[str nodeLabel, str sourceId]
+                                nodeEdge] nodeEdges] nodeEdges2 = ();
 
 /**
  * Root Id
@@ -56,18 +71,27 @@ private str getUniqueNodeId()
 /**
  * Add New Node
  */
-private void addNewNode(bool isRed, str newNodeId, str nodeLabel,
+public void addNewNode(bool isRed, str newNodeId, str nodeLabel,
     str parentNodeId, str edgeLabel
 ){
     if (isRed) {
         redNodes += (newNodeId: nodeLabel);
+        redNodesLabelList += nodeLabel;
     } else {
         blueNodes += (newNodeId: nodeLabel);
     }
-    if (parentNodeId == "" || parentNodeId notin nodeEdges) {
-        nodeEdges += (parentNodeId: (edgeLabel: newNodeId));
-    } else {
-        nodeEdges[parentNodeId] += (edgeLabel: newNodeId);
+    
+    if (parentNodeId != "") {
+        if (parentNodeId notin nodeEdges) {
+            nodeEdges += (parentNodeId: {<edgeLabel, newNodeId>});
+        } else {
+            nodeEdges[parentNodeId] += {<edgeLabel, newNodeId>};
+        }
+        if (newNodeId notin nodeEdges2) {
+            nodeEdges2 += (newNodeId: {<edgeLabel, parentNodeId>});
+        } else {
+            nodeEdges2[newNodeId] += {<edgeLabel, parentNodeId>};
+        }
     }
 }
 
@@ -87,13 +111,17 @@ private str addPath(str nodeId, str sample, str terminalNodeLabel)
     str nodeIdL = ""; //TODO Don't need it but Rascal gives error otherwise
 
     // Check if the first character of the sample exists or not as a path
-    if (nodeId notin nodeEdges || sample[0] notin nodeEdges[nodeId]) {
+    if (nodeId notin nodeEdges || sample[0] notin [nodeEdge.label |
+        tuple[str label, str destId] nodeEdge <- nodeEdges[nodeId]]
+    ) {
         // Create path
         nodeIdL = getUniqueNodeId();
         addNewNode(false, nodeIdL, nodeLabelL, nodeId, sample[0]);
     } else {
         // Update path
-        nodeIdL = nodeEdges[nodeId][sample[0]];
+        // Get First Node Id By Label
+        nodeIdL = [nodeEdge.destId | tuple[str label, str destId] nodeEdge
+            <- nodeEdges[nodeId], nodeEdge.label == sample[0]][0];
     }
 
     return addPath(nodeIdL, sampleRest, terminalNodeLabel);

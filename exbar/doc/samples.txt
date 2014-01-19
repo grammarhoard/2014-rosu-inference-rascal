@@ -6,13 +6,38 @@ TrainingSet::addSample("bb",   true);
 TrainingSet::addSample("abb",  false);
 TrainingSet::addSample("b",    false);
 -----------------------------
+// Before merging
 Red Nodes("root":"")
 Blue Nodes("Node-7":"Rejected","Node-6":"Accepted","Node-5":"Rejected","Node-4":"Accepted","Node-3":"","Node-2":"","Node-1":"Accepted")
 Node Edges(
-  "Node-5":("b":"Node-6"),
-  "Node-3":("a":"Node-4"),
-  "Node-2":("b":"Node-7","a":"Node-3"),
-  "Node-1":("b":"Node-2"),
-  "root":("b":"Node-5","a":"Node-1"),
-  "":("":"root")
+  "Node-5":{<"b","Node-6">},
+  "Node-3":{<"a","Node-4">},
+  "Node-2":{
+    <"a","Node-3">,
+    <"b","Node-7">
+  },
+  "Node-1":{<"b","Node-2">},
+  "root":{
+    <"a","Node-1">,
+    <"b","Node-5">
+  }
 )
+-----------------------------
+// After first merge
+Red Nodes("Node-7":"Rejected","Node-6":"Accepted","root":"")
+Blue Nodes("Node-4":"Accepted","Node-3":"","Node-2":"","Node-1":"Accepted")
+Node Edges(
+  "Node-7":{<"b","Node-6">},
+  "Node-5":{},
+  "Node-3":{<"a","Node-4">},
+  "Node-2":{
+    <"a","Node-3">,
+    <"b","Node-7">
+  },
+  "Node-1":{<"b","Node-2">},
+  "root":{
+    <"a","Node-1">,
+    <"b","Node-7">
+  }
+)
+-----------------------------

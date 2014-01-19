@@ -27,6 +27,7 @@ public void build()
         nodes += ellipse(
             text(APTA::redNodes[nodeId]),
             id(nodeId),
+            mouseOver(box(text(nodeId), fillColor("white"))),
             size(50),
             fillColor("red")
         );
@@ -35,6 +36,7 @@ public void build()
         nodes += ellipse(
             text(APTA::blueNodes[nodeId]),
             id(nodeId),
+            mouseOver(box(text(nodeId), fillColor("white"))),
             size(50),
             fillColor("blue")
         );
@@ -45,15 +47,16 @@ public void build()
         if (sourceId == "") {
             continue;
         }
-        for (str labelL <- APTA::nodeEdges[sourceId]) {
+        //TODO one edge's label is not shown (probably because the edge is curved)
+        for (tuple[str label, str destId] nodeEdge <- APTA::nodeEdges[sourceId]) {
             edges += edge(
                 sourceId,
-                APTA::nodeEdges[sourceId][labelL],
-                label(text(labelL)),
+                nodeEdge.destId,
+                label(text(nodeEdge.label)),
                 toArrow(edgeArrow)
             );
         }
     }
 
-    render(graph(nodes, edges, hint("layered"), gap(100)));
+    render(graph(nodes, edges, hint("layered"), gap(50)));
 }
