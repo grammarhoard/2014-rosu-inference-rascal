@@ -17,6 +17,7 @@ public void build()
     print("Red Nodes"); iprintln(APTA::redNodes);
     print("Blue Nodes"); iprintln(APTA::blueNodes);
     print("Node Edges"); iprintln(APTA::nodeEdges);
+    print("Node Edges2"); iprintln(APTA::nodeEdges2);
 
     list[Figure] nodes = [];
     list[Edge] edges = [];
@@ -47,7 +48,8 @@ public void build()
         if (sourceId == "") {
             continue;
         }
-        //TODO one edge's label is not shown (probably because the edge is curved)
+        //TODO one edge's label is not shown (probably because the edge is curved
+        //TODO or because there are more than one)
         for (tuple[str label, str destId] nodeEdge <- APTA::nodeEdges[sourceId]) {
             edges += edge(
                 sourceId,
@@ -55,6 +57,8 @@ public void build()
                 label(text(nodeEdge.label)),
                 toArrow(edgeArrow)
             );
+            println("sourceId: <sourceId>; destId: <nodeEdge.destId>; " +
+                    "label: <nodeEdge.label>");
         }
     }
 

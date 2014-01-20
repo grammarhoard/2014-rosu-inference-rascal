@@ -41,3 +41,44 @@ Node Edges(
   }
 )
 -----------------------------
+// After merging
+Red Nodes("Node-7":"Rejected","Node-6":"Accepted","Node-2":"","root":"")
+Blue Nodes()
+Node Edges(
+  "Node-7":{<"b","Node-6">},
+  "Node-6":{<"b","Node-2">},
+  "Node-5":{},
+  "Node-3":{},
+  "Node-2":{
+    <"a","root">,
+    <"b","Node-7">
+  },
+  "Node-1":{},
+  "root":{
+    <"a","Node-6">,
+    <"b","Node-7">
+  }
+)
+Node Edges2(
+  "Node-7":{
+    <"b","Node-2">,
+    <"b","root">
+  },
+  "Node-6":{
+    <"a","root">,
+    <"b","Node-7">
+  },
+  "Node-5":{},
+  "Node-4":{},
+  "Node-3":{},
+  "Node-2":{<"b","Node-6">},
+  "Node-1":{},
+  "root":{<"a","Node-2">}
+)
+sourceId: Node-7; destId: Node-6; label: b
+sourceId: Node-6; destId: Node-2; label: b
+sourceId: Node-2; destId: root; label: a
+sourceId: Node-2; destId: Node-7; label: b
+sourceId: root; destId: Node-6; label: a
+sourceId: root; destId: Node-7; label: b
+-----------------------------

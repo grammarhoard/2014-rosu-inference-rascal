@@ -80,18 +80,29 @@ public void addNewNode(bool isRed, str newNodeId, str nodeLabel,
     } else {
         blueNodes += (newNodeId: nodeLabel);
     }
-    
+
     if (parentNodeId != "") {
+        // If there is a parent node id, there should also be a node edge
         if (parentNodeId notin nodeEdges) {
             nodeEdges += (parentNodeId: {<edgeLabel, newNodeId>});
         } else {
             nodeEdges[parentNodeId] += {<edgeLabel, newNodeId>};
         }
-        if (newNodeId notin nodeEdges2) {
-            nodeEdges2 += (newNodeId: {<edgeLabel, parentNodeId>});
-        } else {
-            nodeEdges2[newNodeId] += {<edgeLabel, parentNodeId>};
-        }
+    }
+
+    //TODO we don't need it, but rascal gives error otherwise
+    set[tuple[str nodeLabel, str sourceId] nodeEdge] nodeEdgesL2 = {};
+
+    if (edgeLabel != "") {
+        nodeEdgesL2 = {<edgeLabel, parentNodeId>};
+    } else {
+        nodeEdgesL2 = {};
+    }
+
+    if (newNodeId notin nodeEdges2) {
+        nodeEdges2 += (newNodeId: nodeEdgesL2);
+    } else {
+        nodeEdges2[newNodeId] += nodeEdgesL2;
     }
 }
 

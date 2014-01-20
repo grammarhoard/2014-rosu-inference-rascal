@@ -36,7 +36,7 @@ public void main()
     TrainingSet::addSample("b",    false);
 
     APTA::build();
-    GraphVis::build();
+    // GraphVis::build();
     exbarSearch();
     GraphVis::build();
 }
@@ -50,14 +50,14 @@ private void exbarSearch()
 
     // Limits the number of searches to the number of red nodes
     if (size(APTA::redNodes) > maxRed) {
-        println("Limit exceeded!");
+        println("Limit exceeded (no redNodes is greater than maxRed)!");
         return;
     }
 
     // No blue nodes exist
     if (size(APTA::blueNodes) == 0) {
         // Found a solution
-        println("Solution Found!");
+        println("Solution Found (No blue nodes exist)!");
         return;
     }
 
@@ -136,6 +136,7 @@ private void colorNodeRed(str nodeId)
 {
     APTA::addNewNode(true, nodeId, APTA::blueNodes[nodeId], "", "");
     APTA::blueNodes = APTA::blueNodes - (nodeId: "");
+    maxRed += 1;
 }
 
 /**
@@ -143,17 +144,30 @@ private void colorNodeRed(str nodeId)
  */
 private bool tryMerge(str redNodeId, str blueNodeId)
 {
-    print("----------------- Before merge\nRed Nodes"); iprintln(APTA::redNodes);
-    print("Blue Nodes"); iprintln(APTA::blueNodes);
-    print("Node Edges"); iprintln(APTA::nodeEdges);
-    print("Node Edges2"); iprintln(APTA::nodeEdges2);
-    println("---------------\nredNodeId: <redNodeId>; blueNodeId: <blueNodeId>");
-
     //TODO WTF StackOverflow() otherwise
     map[str sourceId, set[tuple[str nodeLabel, str destId]
                                nodeEdge] nodeEdges] nE = APTA::nodeEdges;
     map[str destId, set[tuple[str nodeLabel, str sourceId]
                              nodeEdge] nodeEdges] nE2 = APTA::nodeEdges2;
+
+    // Check if the nodes can be merged
+    // If the nodes are connected, merge is not allowed
+    if ((redNodeId in nE && blueNodeId in [nodeEdge.destId |
+            // Check if the red node has a child relation with the blue node
+            tuple[str nodeLabel, str destId] nodeEdge <- nE[redNodeId]]) ||
+        (redNodeId in nE2 && blueNodeId in [nodeEdge.sourceId |
+            // Check if the red node has a parrent relation with the blue node
+            tuple[str nodeLabel, str sourceId] nodeEdge <- nE2[redNodeId]])
+    ) {
+        println("--- Merge failed! <redNodeId> && <blueNodeId> nodes are connected");
+        return false;
+    }
+
+    print("----------------- Before merge\nRed Nodes"); iprintln(APTA::redNodes);
+    print("Blue Nodes"); iprintln(APTA::blueNodes);
+    print("Node Edges"); iprintln(APTA::nodeEdges);
+    print("Node Edges2"); iprintln(APTA::nodeEdges2);
+    println("---------------\nredNodeId: <redNodeId>; blueNodeId: <blueNodeId>");
 
     // Get the nodes pointing to the blue node and make them point the red node
     for (tuple[str labelL, str sourceId] edgeL <- nE2[blueNodeId]) {
@@ -174,6 +188,9 @@ private bool tryMerge(str redNodeId, str blueNodeId)
                 nE[redNodeId] += {edgeL};
             }
             nE[blueNodeId] -= {edgeL};
+
+            nE2[edgeL.destId] += {<edgeL.label, redNodeId>};
+            nE2[edgeL.destId] -= {<edgeL.label, blueNodeId>};
         }
     }
 
@@ -183,11 +200,6 @@ private bool tryMerge(str redNodeId, str blueNodeId)
     //TODO WTF StackOverflow() otherwise
     APTA::nodeEdges = nE;
     APTA::nodeEdges2 = nE2;
-
-    print("----------------- After merge\nRed Nodes"); iprintln(APTA::redNodes);
-    print("Blue Nodes"); iprintln(APTA::blueNodes);
-    print("Node Edges"); iprintln(APTA::nodeEdges);
-    print("Node Edges2"); iprintln(APTA::nodeEdges2);
 
     return true;
 }
