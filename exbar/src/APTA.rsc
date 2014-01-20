@@ -39,14 +39,14 @@ public map[str id, str label] blueNodes = ();
  * Map of Edges between nodes Source -> Destination (for both, red and blue)
  * Used to get the children of a node
  */
-public map[str sourceId, set[tuple[str nodeLabel, str destId]
+public map[str sourceId, set[tuple[str edgeLabel, str destId]
                                   nodeEdge] nodeEdges] nodeEdges = ();
 
 /**
  * Map of Edges between nodes Destination -> Source (for both, red and blue)
  * Used to get the parrents of a node
  */
-public map[str destId, set[tuple[str nodeLabel, str sourceId]
+public map[str destId, set[tuple[str edgeLabel, str sourceId]
                                 nodeEdge] nodeEdges] nodeEdges2 = ();
 
 /**

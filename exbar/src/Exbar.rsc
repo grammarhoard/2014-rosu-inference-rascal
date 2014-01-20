@@ -27,6 +27,27 @@ private int maxRed = 0;
 public void main()
 {
     // Add positive and negative samples
+    /*
+    // Sample Set 1
+    TrainingSet::addSample("1",   true);
+    TrainingSet::addSample("110", true);
+    TrainingSet::addSample("01",  true);
+    TrainingSet::addSample("001", true);
+
+    TrainingSet::addSample("00",  false);
+    TrainingSet::addSample("10",  false);
+    TrainingSet::addSample("000", false);
+    */
+    /*
+    // Sample Set 2
+    TrainingSet::addSample("1",    true);
+    TrainingSet::addSample("11",   true);
+    TrainingSet::addSample("1111", true);
+
+    TrainingSet::addSample("0",    false);
+    TrainingSet::addSample("101",  false);
+    */
+
     // Sample Set 3
     TrainingSet::addSample("a",    true);
     TrainingSet::addSample("abaa", true);
@@ -34,6 +55,7 @@ public void main()
 
     TrainingSet::addSample("abb",  false);
     TrainingSet::addSample("b",    false);
+
 
     APTA::build();
     // GraphVis::build();
@@ -50,7 +72,7 @@ private void exbarSearch()
 
     // Limits the number of searches to the number of red nodes
     if (size(APTA::redNodes) > maxRed) {
-        println("Limit exceeded (no redNodes is greater than maxRed)!");
+        println("Limit exceeded (number of redNodes is greater than maxRed)!");
         return;
     }
 
@@ -62,7 +84,7 @@ private void exbarSearch()
     }
 
     tuple[str id, str label] blueNodeL = pickBlueNode();
-    println("blueNodeL: <blueNodeL>");
+    println("Picked: blueNodeL: <blueNodeL>");
 
     // Try to merge with all red nodes that have the same label
     for (str redNodeId <- [redNode | redNode <- APTA::redNodes,
@@ -70,7 +92,7 @@ private void exbarSearch()
     ) {
          if (tryMerge(redNodeId, blueNodeL.id) == true) {
              // Succeed in merging the blue node with a red node
-             println("Merging succeeded!");
+             println("R: <redNodeId> merged successfully with B: <blueNodeL>!");
              exbarSearch();
              return;
          }
@@ -111,7 +133,7 @@ private tuple[str nodeId, str nodeLabel] pickBlueNode()
 
     // 2. Look for blue nodes that have only one or more possible merge(s)
     for (str blueNodeId <- APTA::blueNodes) {
-        // Get possible number of merges (number of red nodes with the same label)
+        // Get possible number of merges (number of red nodes with same label)
         int possibleNoMergesL = size([nodeLabel | nodeLabel <-
             APTA::redNodesLabelList, nodeLabel == APTA::blueNodes[blueNodeId]]);
 
@@ -144,10 +166,12 @@ private void colorNodeRed(str nodeId)
  */
 private bool tryMerge(str redNodeId, str blueNodeId)
 {
+    println("Trying to merge R: <redNodeId> with B: <blueNodeId>...");
+
     //TODO WTF StackOverflow() otherwise
-    map[str sourceId, set[tuple[str nodeLabel, str destId]
+    map[str sourceId, set[tuple[str edgeLabel, str destId]
                                nodeEdge] nodeEdges] nE = APTA::nodeEdges;
-    map[str destId, set[tuple[str nodeLabel, str sourceId]
+    map[str destId, set[tuple[str edgeLabel, str sourceId]
                              nodeEdge] nodeEdges] nE2 = APTA::nodeEdges2;
 
     // Check if the nodes can be merged
@@ -159,15 +183,64 @@ private bool tryMerge(str redNodeId, str blueNodeId)
             // Check if the red node has a parrent relation with the blue node
             tuple[str nodeLabel, str sourceId] nodeEdge <- nE2[redNodeId]])
     ) {
-        println("--- Merge failed! <redNodeId> && <blueNodeId> nodes are connected");
+        println("Merge failed! the nodes are connected");
         return false;
     }
 
-    print("----------------- Before merge\nRed Nodes"); iprintln(APTA::redNodes);
-    print("Blue Nodes"); iprintln(APTA::blueNodes);
-    print("Node Edges"); iprintln(APTA::nodeEdges);
-    print("Node Edges2"); iprintln(APTA::nodeEdges2);
-    println("---------------\nredNodeId: <redNodeId>; blueNodeId: <blueNodeId>");
+    // If the nodes have transitions on a common symbol
+    //     that lead to nodes which are not equivalent, merge is not allowed
+    //TODO ATTENTION - you may want to rewrite this more elegantly
+    if (redNodeId in nE && blueNodeId in nE) {
+        // Both nodes have children
+        set[tuple[str edgeLabel, str nodeLabel] nodeEdge] redNodesChildren =
+            {<nodeEdge.edgeLabel, nodeEdge.destId in APTA::redNodes ?
+                APTA::redNodes[nodeEdge.destId]: APTA::blueNodes[nodeEdge.destId]> |
+                tuple[str edgeLabel, str destId] nodeEdge <- nE[redNodeId]};
+        ;
+        set[tuple[str edgeLabel, str nodeLabel] nodeEdge] blueNodesChildren =
+            {<nodeEdge.edgeLabel, nodeEdge.destId in APTA::redNodes ?
+                APTA::redNodes[nodeEdge.destId]: APTA::blueNodes[nodeEdge.destId]> |
+                tuple[str edgeLabel, str destId] nodeEdge <- nE[blueNodeId]};
+        ;
+        for (tuple[str edgeLabel, str nodeLabel] nodeEdgeRed <- redNodesChildren) {
+            for (tuple[str edgeLabel, str nodeLabel] nodeEdgeBlue <- blueNodesChildren) {
+                if (nodeEdgeRed.edgeLabel == nodeEdgeBlue.edgeLabel && 
+                    nodeEdgeRed.nodeLabel != nodeEdgeBlue.nodeLabel
+                ) {
+                    println("Merge failed! the nodes have children on a " +
+                        "common symbol that lead to nodes which are not equivalent");
+                    return false; 
+                }
+            }
+        }
+    }
+    /*
+    //TODO It is not needed, but I am not sure
+    if (redNodeId in nE && blueNodeId in nE2) {
+        // Both nodes have parents
+        set[tuple[str edgeLabel, str nodeLabel] nodeEdge] redNodesParents =
+            {<nodeEdge.edgeLabel, nodeEdge.sourceId in APTA::redNodes ?
+                APTA::redNodes[nodeEdge.sourceId]: APTA::blueNodes[nodeEdge.sourceId]> |
+                tuple[str edgeLabel, str sourceId] nodeEdge <- nE2[redNodeId]};
+        ;
+        set[tuple[str edgeLabel, str nodeLabel] nodeEdge] blueNodesParents =
+            {<nodeEdge.edgeLabel, nodeEdge.sourceId in APTA::redNodes ?
+                APTA::redNodes[nodeEdge.sourceId]: APTA::blueNodes[nodeEdge.sourceId]> |
+                tuple[str edgeLabel, str sourceId] nodeEdge <- nE2[blueNodeId]};
+        ;
+        for (tuple[str edgeLabel, str nodeLabel] nodeEdgeRed <- redNodesParents) {
+            for (tuple[str edgeLabel, str nodeLabel] nodeEdgeBlue <- blueNodesParents) {
+                if (nodeEdgeRed.edgeLabel == nodeEdgeBlue.edgeLabel && 
+                    nodeEdgeRed.nodeLabel != nodeEdgeBlue.nodeLabel
+                ) {
+                    println("Merge failed! the nodes have parents on a " +
+                        "common symbol that lead to nodes which are not equivalent");
+                    return false; 
+                }
+            }
+        }
+    }
+    */
 
     // Get the nodes pointing to the blue node and make them point the red node
     for (tuple[str labelL, str sourceId] edgeL <- nE2[blueNodeId]) {
