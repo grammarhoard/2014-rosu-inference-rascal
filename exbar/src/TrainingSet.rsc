@@ -10,10 +10,25 @@ module TrainingSet
 import IO;
 
 /**
- * Training Set 0
- * T = {<s1, l1>, ..., <sm, lm>}
+ * Training Set T = {<s1, l1>, ..., <sm, lm>}
  */
-public set[tuple[str, bool]] trainingSet0 = {};
+private data TrainingS = trainingSet();
+anno set[tuple[str, bool]] TrainingS@T;
+
+/**
+ * Set of samples
+ */
+private set[tuple[str, bool]] trainingSet0 = {};
+
+/**
+ * Build Training Set
+ */
+public TrainingS build()
+{
+    TrainingS trainingSet = trainingSet();
+    trainingSet@T = trainingSet0;
+    return trainingSet;
+}
 
 /**
  * Add sample to Training Set

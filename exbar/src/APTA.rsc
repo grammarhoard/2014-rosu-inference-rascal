@@ -20,54 +20,58 @@ import TrainingSet;
 import String;
 
 /**
- * APTA 0
- * A = <Q, Z, d, s, F+, F->
+ * APTA A = <Q, Z, d, s, F+, F->
  */
-public tuple[
+private data APTA = apta();
+private APTA APTA;
+anno tuple[
     set[str] Q, // set of node ids
     set[str] Z, // set of input symbols
-    str(str nodeId, str edgeLabel) transitionFunction,
+    str(str nodeId, str edgeLabel) d, // transition function
     str s, // root node's id
     set[str] Fp, // final nodes of strings in S+
     set[str] Fm // final nodes of strings in S-
-] apta0;
-
-public set[str] alphabet = {};
+] APTA@A;
 
 /**
  * Map of Red Nodes
  */
-public map[str id, str label] redNodes = ();
+anno map[str id, str label] APTA@redNodes;
 
 /**
  * Red Nodes Label List
  * Used by Exbar algorithm (pickBlueNode)
  */
-public list[str] redNodesLabelList = [];
+anno list[str] APTA@redNodesLabelList;
 
 /**
  * Map of Blue Nodes
  */
-public map[str id, str label] blueNodes = ();
+anno map[str id, str label] APTA@blueNodes;
 
 /**
  * Map of Edges between nodes Source -> Destination (for both, red and blue)
  * Used to get the children of a node
  */
-public map[str sourceId, set[tuple[str edgeLabel, str destId]
-                                  nodeEdge] nodeEdges] nodeEdges = ();
+anno map[str sourceId, set[tuple[str edgeLabel, str destId]
+                           nodeEdge] nodeEdges] APTA@nodeEdges;
 
 /**
  * Map of Edges between nodes Destination -> Source (for both, red and blue)
  * Used to get the parrents of a node
  */
-public map[str destId, set[tuple[str edgeLabel, str sourceId]
-                                nodeEdge] nodeEdges] nodeEdges2 = ();
+anno map[str destId, set[tuple[str edgeLabel, str sourceId]
+                         nodeEdge] nodeEdges] APTA@nodeEdges2;
+
+/**
+ * Alphabet (set of input symbols)
+ */
+private set[str] alphabet = {};
 
 /**
  * Root Id
  */
-public str rootId = "root";
+private str rootId = "root";
 
 /**
  * Node Id Auto Increment
@@ -86,22 +90,22 @@ private str getUniqueNodeId()
 /**
  * Add New Node
  */
-public void addNewNode(bool isRed, str newNodeId, str nodeLabel,
+private void addNewNode(bool isRed, str newNodeId, str nodeLabel,
     str parentNodeId, str edgeLabel
 ){
     if (isRed) {
-        redNodes += (newNodeId: nodeLabel);
-        redNodesLabelList += nodeLabel;
+        APTA@redNodes += (newNodeId: nodeLabel);
+        APTA@redNodesLabelList += nodeLabel;
     } else {
-        blueNodes += (newNodeId: nodeLabel);
+        APTA@blueNodes += (newNodeId: nodeLabel);
     }
 
     if (parentNodeId != "") {
         // If there is a parent node id, there should also be a node edge
-        if (parentNodeId notin nodeEdges) {
-            nodeEdges += (parentNodeId: {<edgeLabel, newNodeId>});
+        if (parentNodeId notin APTA@nodeEdges) {
+            APTA@nodeEdges += (parentNodeId: {<edgeLabel, newNodeId>});
         } else {
-            nodeEdges[parentNodeId] += {<edgeLabel, newNodeId>};
+            APTA@nodeEdges[parentNodeId] += {<edgeLabel, newNodeId>};
         }
     }
 
@@ -114,10 +118,10 @@ public void addNewNode(bool isRed, str newNodeId, str nodeLabel,
         nodeEdgesL2 = {};
     }
 
-    if (newNodeId notin nodeEdges2) {
-        nodeEdges2 += (newNodeId: nodeEdgesL2);
+    if (newNodeId notin APTA@nodeEdges2) {
+        APTA@nodeEdges2 += (newNodeId: nodeEdgesL2);
     } else {
-        nodeEdges2[newNodeId] += nodeEdgesL2;
+        APTA@nodeEdges2[newNodeId] += nodeEdgesL2;
     }
 }
 
@@ -128,7 +132,7 @@ private str addPath(str nodeId, str sample, str terminalNodeLabel)
 {
     // Terminal Node
     if (sample == "") {
-        blueNodes[nodeId] = terminalNodeLabel;
+        APTA@blueNodes[nodeId] = terminalNodeLabel;
         return nodeId;
     }
 
@@ -137,8 +141,8 @@ private str addPath(str nodeId, str sample, str terminalNodeLabel)
     str nodeIdL = ""; //TODO Don't need it but Rascal gives error otherwise
 
     // Check if the first character of the sample exists or not as a path
-    if (nodeId notin nodeEdges || sample[0] notin [nodeEdge.label |
-        tuple[str label, str destId] nodeEdge <- nodeEdges[nodeId]]
+    if (nodeId notin APTA@nodeEdges || sample[0] notin [nodeEdge.label |
+        tuple[str label, str destId] nodeEdge <- APTA@nodeEdges[nodeId]]
     ) {
         // Create path
         nodeIdL = getUniqueNodeId();
@@ -150,51 +154,60 @@ private str addPath(str nodeId, str sample, str terminalNodeLabel)
         // Update path
         // Get First Node Id By Label
         nodeIdL = [nodeEdge.destId | tuple[str edgeLabel, str destId] nodeEdge
-            <- nodeEdges[nodeId], nodeEdge.edgeLabel == sample[0]][0];
+            <- APTA@nodeEdges[nodeId], nodeEdge.edgeLabel == sample[0]][0];
     }
 
     return addPath(nodeIdL, sampleRest, terminalNodeLabel);
 }
 
 /**
+ * APTA Transition Function
+ * Returns the node id following the specified edge from a specified source node
+ */
+private str transitionFunction(str nodeId, str edgeLabel)
+{
+    return [nodeEdge.destId | tuple[str edgeLabel, str destId] nodeEdge
+            <- APTA@nodeEdges[nodeId], nodeEdge.edgeLabel == edgeLabel][0];
+}
+
+/**
  * Build APTA from Training Set starting with the Root Node
  */
-public void build()
+public APTA build(TrainingS trainingSet)
 {
+    // APTA init
+    APTA = apta();
+    APTA@redNodes = ();
+    APTA@redNodesLabelList = [];
+    APTA@blueNodes = ();
+    APTA@nodeEdges = ();
+    APTA@nodeEdges2 = ();
+
     // Start with the root of APTA colored red
     addNewNode(true, rootId, "", "", "");
 
-    for (tuple[str valueL, bool typeL] sample <- TrainingSet::trainingSet0) {
+    for (tuple[str valueL, bool typeL] sample <- trainingSet@T) {
         addPath(rootId, sample.valueL, sample.typeL ? "Accepted" : "Rejected");
     }
 
-    // Build APTA 0
+    // Build APTA A
     /*
     set[str] Q, // set of node ids
     set[str] Z, // set of input symbols
-    str(str nodeId, str edgeLabel) transitionFunction,
+    str(str nodeId, str edgeLabel) d, // transition function
     str s, // root node's id
     set[str] Fp, // final nodes of strings in S+
     set[str] Fm // final nodes of strings in S-
     */
-    apta0 = <
-        {id | id <- redNodes + blueNodes},
+    APTA@A = <
+        {id | id <- APTA@redNodes + APTA@blueNodes},
         alphabet,
         transitionFunction,
         rootId,
-        {id | id <- redNodes, redNodes[id] == "Accepted"} +
-            {id | id <- blueNodes, blueNodes[id] == "Accepted"},
-        {id | id <- redNodes, redNodes[id] == "Rejected"} +
-            {id | id <- blueNodes, blueNodes[id] == "Rejected"}
+        {id | id <- APTA@redNodes, APTA@redNodes[id] == "Accepted"} +
+            {id | id <- APTA@blueNodes, APTA@blueNodes[id] == "Accepted"},
+        {id | id <- APTA@redNodes, APTA@redNodes[id] == "Rejected"} +
+            {id | id <- APTA@blueNodes, APTA@blueNodes[id] == "Rejected"}
     >;
-}
-
-/**
- * APTA Transition Function
- * Returns the node id following the specified edge from a specified source node
- */
-public str transitionFunction(str nodeId, str edgeLabel)
-{
-    return [nodeEdge.destId | tuple[str edgeLabel, str destId] nodeEdge
-            <- nodeEdges[nodeId], nodeEdge.edgeLabel == edgeLabel][0];
+    return APTA;
 }

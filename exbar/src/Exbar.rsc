@@ -1,20 +1,12 @@
 /**
  * Exbar Module
  * Algorithm for the exact inference of minimal DFA
- *
- * Deterministic Finite Automata (DFA)
- * DFA A = <Q, Z, d, s, F> where
- *     Q = finite non-empty set of states
- *     Sigma Z = finite non-empty set of input symbols (alphabet)
- *     delta d : Q x Z -> Q = transition function
- *     s (element of) Q = start state (initial "reset state) <=> q0
- *     F (subset of) Q = set of final states or accepting states of A
- * Built on APTA
  */
 module Exbar
 
 import TrainingSet;
 import APTA;
+import DFA;
 import GraphVis;
 
 import IO;
@@ -22,16 +14,9 @@ import Map;
 import List;
 
 /**
- * DFA 0
- * A = <Q, Z, d, s, F>
+ * APTA
  */
-public tuple[
-    set[str] Q, // set of states
-    set[str] Z, // set of input symbols
-    str(str nodeId, str edgeLabel) transitionFunction,
-    str s, // start state
-    set[str] F // final states
-] dfa0;
+private APTA APTA;
 
 /**
  * Current number of possible merges
@@ -49,7 +34,6 @@ private int maxRed = 0;
 public void main()
 {
     // Add positive and negative samples
-
     // Sample Set 1
     TrainingSet::addSample("1",   true);
     TrainingSet::addSample("110", true);
@@ -59,7 +43,6 @@ public void main()
     TrainingSet::addSample("00",  false);
     TrainingSet::addSample("10",  false);
     TrainingSet::addSample("000", false);
-
     /*
     // Sample Set 2
     TrainingSet::addSample("1",    true);
@@ -80,29 +63,18 @@ public void main()
     */
     // TrainingSet::addSampleFromFile(|file:///home/orosu/Documents/Repos/gi/exbar/src/TrainingSet.rsc|, false);
 
-    APTA::build();
-    print("APTA 0: "); iprintln(APTA::apta0);
-    // GraphVis::build();
-    exbarSearch();
-    GraphVis::build();
+    // Build APTA
+    APTA = APTA::build(TrainingSet::build());
+    print("APTA 0: "); iprintln(APTA);
+    // GraphVis::build(APTA);
 
-    // Build DFA 0
-    /*
-    set[str] Q, // set of states
-    set[str] Z, // set of input symbols
-    str(str nodeId, str edgeLabel) transitionFunction,
-    str s, // start state
-    set[str] F // final states
-    */
-    dfa0 = <
-        {id | id <- APTA::redNodes + APTA::blueNodes},
-        APTA::alphabet,
-        APTA::transitionFunction,
-        APTA::rootId,
-        {id | id <- APTA::redNodes, APTA::redNodes[id] != ""} +
-            {id | id <- APTA::blueNodes, APTA::blueNodes[id] != ""}
-    >;
-    print("DFA 0: "); iprintln(dfa0);
+    // EXBAR Search
+    exbarSearch();
+    GraphVis::build(APTA);
+
+    // Build DFA
+    DFA DFA = DFA::build(APTA);
+    print("DFA 0: "); iprintln(DFA);
 }
 
 /**
@@ -113,13 +85,13 @@ private void exbarSearch()
     maxRed += 1;
 
     // Limits the number of searches to the number of red nodes
-    if (size(APTA::redNodes) > maxRed) {
+    if (size(APTA@redNodes) > maxRed) {
         println("Limit exceeded (number of redNodes is greater than maxRed)!");
         return;
     }
 
     // No blue nodes exist
-    if (size(APTA::blueNodes) == 0) {
+    if (size(APTA@blueNodes) == 0) {
         // Found a solution
         println("Solution Found (No blue nodes exist)!");
         return;
@@ -129,8 +101,8 @@ private void exbarSearch()
     println("Picked: blueNodeL: <blueNodeL>");
 
     // Try to merge with all red nodes that have the same label
-    for (str redNodeId <- [redNode | redNode <- APTA::redNodes,
-         APTA::redNodes[redNode] == blueNodeL.label]
+    for (str redNodeId <- [redNode | redNode <- APTA@redNodes,
+         APTA@redNodes[redNode] == blueNodeL.label]
     ) {
          if (tryMerge(redNodeId, blueNodeL.id) == true) {
              // Succeed in merging the blue node with a red node
@@ -160,10 +132,10 @@ private tuple[str nodeId, str nodeLabel] pickBlueNode()
 {
     if (noPossibleMerges == 0) {
         // 1. Look for blue nodes that can't be merged with any red node
-        for (str blueNodeId <- APTA::blueNodes) {
+        for (str blueNodeId <- APTA@blueNodes) {
 
             // The blue node's label does not exist in the red node's label set
-            if (APTA::blueNodes[blueNodeId] notin APTA::redNodesLabelList) {
+            if (APTA@blueNodes[blueNodeId] notin APTA@redNodesLabelList) {
                 // Force promotion to red
                 colorNodeRed(blueNodeId);
                 continue;
@@ -174,10 +146,10 @@ private tuple[str nodeId, str nodeLabel] pickBlueNode()
     }
 
     // 2. Look for blue nodes that have only one or more possible merge(s)
-    for (str blueNodeId <- APTA::blueNodes) {
+    for (str blueNodeId <- APTA@blueNodes) {
         // Get possible number of merges (number of red nodes with same label)
         int possibleNoMergesL = size([nodeLabel | nodeLabel <-
-            APTA::redNodesLabelList, nodeLabel == APTA::blueNodes[blueNodeId]]);
+            APTA@redNodesLabelList, nodeLabel == APTA@blueNodes[blueNodeId]]);
 
         if (possibleNoMergesL <= noPossibleMerges) {
             if (possibleNoMergesL == 0) {
@@ -185,7 +157,7 @@ private tuple[str nodeId, str nodeLabel] pickBlueNode()
                 colorNodeRed(blueNodeId);
                 continue;
             } else {
-                return <blueNodeId, APTA::blueNodes[blueNodeId]>;
+                return <blueNodeId, APTA@blueNodes[blueNodeId]>;
             }
         }
     }
@@ -198,8 +170,10 @@ private tuple[str nodeId, str nodeLabel] pickBlueNode()
  */
 private void colorNodeRed(str nodeId)
 {
-    APTA::addNewNode(true, nodeId, APTA::blueNodes[nodeId], "", "");
-    APTA::blueNodes = APTA::blueNodes - (nodeId: "");
+    APTA@redNodes += (nodeId: APTA@blueNodes[nodeId]);
+    APTA@redNodesLabelList += APTA@blueNodes[nodeId];
+
+    APTA@blueNodes = APTA@blueNodes - (nodeId: "");
     maxRed += 1;
 }
 
@@ -212,9 +186,9 @@ private bool tryMerge(str redNodeId, str blueNodeId)
 
     //TODO WTF StackOverflow() otherwise
     map[str sourceId, set[tuple[str edgeLabel, str destId]
-                               nodeEdge] nodeEdges] nE = APTA::nodeEdges;
+                               nodeEdge] nodeEdges] nE = APTA@nodeEdges;
     map[str destId, set[tuple[str edgeLabel, str sourceId]
-                             nodeEdge] nodeEdges] nE2 = APTA::nodeEdges2;
+                             nodeEdge] nodeEdges] nE2 = APTA@nodeEdges2;
 
     // Check if the nodes can be merged
     // If the nodes are connected, merge is not allowed
@@ -238,13 +212,13 @@ private bool tryMerge(str redNodeId, str blueNodeId)
     if (redNodeId in nE && blueNodeId in nE) {
         // Both nodes have children
         set[tuple[str edgeLabel, str nodeLabel] nodeEdge] redNodesChildren =
-            {<nodeEdge.edgeLabel, nodeEdge.destId in APTA::redNodes ?
-                APTA::redNodes[nodeEdge.destId]: APTA::blueNodes[nodeEdge.destId]> |
+            {<nodeEdge.edgeLabel, nodeEdge.destId in APTA@redNodes ?
+                APTA@redNodes[nodeEdge.destId]: APTA@blueNodes[nodeEdge.destId]> |
                 tuple[str edgeLabel, str destId] nodeEdge <- nE[redNodeId]};
         ;
         set[tuple[str edgeLabel, str nodeLabel] nodeEdge] blueNodesChildren =
-            {<nodeEdge.edgeLabel, nodeEdge.destId in APTA::redNodes ?
-                APTA::redNodes[nodeEdge.destId]: APTA::blueNodes[nodeEdge.destId]> |
+            {<nodeEdge.edgeLabel, nodeEdge.destId in APTA@redNodes ?
+                APTA@redNodes[nodeEdge.destId]: APTA@blueNodes[nodeEdge.destId]> |
                 tuple[str edgeLabel, str destId] nodeEdge <- nE[blueNodeId]};
         ;
         for (tuple[str edgeLabel, str nodeLabel] nodeEdgeRed <- redNodesChildren) {
@@ -264,13 +238,13 @@ private bool tryMerge(str redNodeId, str blueNodeId)
     if (redNodeId in nE && blueNodeId in nE2) {
         // Both nodes have parents
         set[tuple[str edgeLabel, str nodeLabel] nodeEdge] redNodesParents =
-            {<nodeEdge.edgeLabel, nodeEdge.sourceId in APTA::redNodes ?
-                APTA::redNodes[nodeEdge.sourceId]: APTA::blueNodes[nodeEdge.sourceId]> |
+            {<nodeEdge.edgeLabel, nodeEdge.sourceId in APTA@redNodes ?
+                APTA@redNodes[nodeEdge.sourceId]: APTA@blueNodes[nodeEdge.sourceId]> |
                 tuple[str edgeLabel, str sourceId] nodeEdge <- nE2[redNodeId]};
         ;
         set[tuple[str edgeLabel, str nodeLabel] nodeEdge] blueNodesParents =
-            {<nodeEdge.edgeLabel, nodeEdge.sourceId in APTA::redNodes ?
-                APTA::redNodes[nodeEdge.sourceId]: APTA::blueNodes[nodeEdge.sourceId]> |
+            {<nodeEdge.edgeLabel, nodeEdge.sourceId in APTA@redNodes ?
+                APTA@redNodes[nodeEdge.sourceId]: APTA@blueNodes[nodeEdge.sourceId]> |
                 tuple[str edgeLabel, str sourceId] nodeEdge <- nE2[blueNodeId]};
         ;
         for (tuple[str edgeLabel, str nodeLabel] nodeEdgeRed <- redNodesParents) {
@@ -313,11 +287,11 @@ private bool tryMerge(str redNodeId, str blueNodeId)
     }
 
     // Remove blue node
-    APTA::blueNodes -= (blueNodeId: "");
+    APTA@blueNodes -= (blueNodeId: "");
 
     //TODO WTF StackOverflow() otherwise
-    APTA::nodeEdges = nE;
-    APTA::nodeEdges2 = nE2;
+    APTA@nodeEdges = nE;
+    APTA@nodeEdges2 = nE2;
 
     return true;
 }
