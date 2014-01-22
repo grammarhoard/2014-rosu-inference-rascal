@@ -20,6 +20,21 @@ import TrainingSet;
 import String;
 
 /**
+ * APTA 0
+ * A = <Q, Z, d, s, F+, F->
+ */
+public tuple[
+    set[str] Q, // set of node ids
+    set[str] Z, // set of input symbols
+    str(str nodeId, str edgeLabel) transitionFunction,
+    str s, // root node's id
+    set[str] Fp, // final nodes of strings in S+
+    set[str] Fm // final nodes of strings in S-
+] apta0;
+
+public set[str] alphabet = {};
+
+/**
  * Map of Red Nodes
  */
 public map[str id, str label] redNodes = ();
@@ -128,11 +143,14 @@ private str addPath(str nodeId, str sample, str terminalNodeLabel)
         // Create path
         nodeIdL = getUniqueNodeId();
         addNewNode(false, nodeIdL, nodeLabelL, nodeId, sample[0]);
+
+        // Build the alphabet for APTA 0
+        alphabet += {sample[0]};
     } else {
         // Update path
         // Get First Node Id By Label
-        nodeIdL = [nodeEdge.destId | tuple[str label, str destId] nodeEdge
-            <- nodeEdges[nodeId], nodeEdge.label == sample[0]][0];
+        nodeIdL = [nodeEdge.destId | tuple[str edgeLabel, str destId] nodeEdge
+            <- nodeEdges[nodeId], nodeEdge.edgeLabel == sample[0]][0];
     }
 
     return addPath(nodeIdL, sampleRest, terminalNodeLabel);
@@ -149,4 +167,34 @@ public void build()
     for (tuple[str valueL, bool typeL] sample <- TrainingSet::trainingSet0) {
         addPath(rootId, sample.valueL, sample.typeL ? "Accepted" : "Rejected");
     }
+
+    // Build APTA 0
+    /*
+    set[str] Q, // set of node ids
+    set[str] Z, // set of input symbols
+    str(str nodeId, str edgeLabel) transitionFunction,
+    str s, // root node's id
+    set[str] Fp, // final nodes of strings in S+
+    set[str] Fm // final nodes of strings in S-
+    */
+    apta0 = <
+        {id | id <- redNodes + blueNodes},
+        alphabet,
+        transitionFunction,
+        rootId,
+        {id | id <- redNodes, redNodes[id] == "Accepted"} +
+            {id | id <- blueNodes, blueNodes[id] == "Accepted"},
+        {id | id <- redNodes, redNodes[id] == "Rejected"} +
+            {id | id <- blueNodes, blueNodes[id] == "Rejected"}
+    >;
+}
+
+/**
+ * APTA Transition Function
+ * Returns the node id following the specified edge from a specified source node
+ */
+public str transitionFunction(str nodeId, str edgeLabel)
+{
+    return [nodeEdge.destId | tuple[str edgeLabel, str destId] nodeEdge
+            <- nodeEdges[nodeId], nodeEdge.edgeLabel == edgeLabel][0];
 }

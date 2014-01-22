@@ -48,13 +48,13 @@ public void build()
         if (sourceId == "") {
             continue;
         }
-        //TODO one edge's label is not shown (probably because the edge is curved
-        //TODO or because there are more than one)
         for (tuple[str label, str destId] nodeEdge <- APTA::nodeEdges[sourceId]) {
             edges += edge(
                 sourceId,
                 nodeEdge.destId,
-                label(text(nodeEdge.label)),
+                //TODO some edge labels are not shown
+                //TODO because of the labels, some whole graphs are not shown
+                // label(text(nodeEdge.label)),
                 toArrow(edgeArrow)
             );
             println("sourceId: <sourceId>; destId: <nodeEdge.destId>; " +

@@ -7,8 +7,11 @@
  */
 module TrainingSet
 
+import IO;
+
 /**
  * Training Set 0
+ * T = {<s1, l1>, ..., <sm, lm>}
  */
 public set[tuple[str, bool]] trainingSet0 = {};
 

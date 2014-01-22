@@ -1,5 +1,15 @@
 /**
  * Exbar Module
+ * Algorithm for the exact inference of minimal DFA
+ *
+ * Deterministic Finite Automata (DFA)
+ * DFA A = <Q, Z, d, s, F> where
+ *     Q = finite non-empty set of states
+ *     Sigma Z = finite non-empty set of input symbols (alphabet)
+ *     delta d : Q x Z -> Q = transition function
+ *     s (element of) Q = start state (initial "reset state) <=> q0
+ *     F (subset of) Q = set of final states or accepting states of A
+ * Built on APTA
  */
 module Exbar
 
@@ -10,6 +20,18 @@ import GraphVis;
 import IO;
 import Map;
 import List;
+
+/**
+ * DFA 0
+ * A = <Q, Z, d, s, F>
+ */
+public tuple[
+    set[str] Q, // set of states
+    set[str] Z, // set of input symbols
+    str(str nodeId, str edgeLabel) transitionFunction,
+    str s, // start state
+    set[str] F // final states
+] dfa0;
 
 /**
  * Current number of possible merges
@@ -27,7 +49,7 @@ private int maxRed = 0;
 public void main()
 {
     // Add positive and negative samples
-    /*
+
     // Sample Set 1
     TrainingSet::addSample("1",   true);
     TrainingSet::addSample("110", true);
@@ -37,7 +59,7 @@ public void main()
     TrainingSet::addSample("00",  false);
     TrainingSet::addSample("10",  false);
     TrainingSet::addSample("000", false);
-    */
+
     /*
     // Sample Set 2
     TrainingSet::addSample("1",    true);
@@ -47,7 +69,7 @@ public void main()
     TrainingSet::addSample("0",    false);
     TrainingSet::addSample("101",  false);
     */
-
+    /*
     // Sample Set 3
     TrainingSet::addSample("a",    true);
     TrainingSet::addSample("abaa", true);
@@ -55,12 +77,32 @@ public void main()
 
     TrainingSet::addSample("abb",  false);
     TrainingSet::addSample("b",    false);
-
+    */
+    // TrainingSet::addSampleFromFile(|file:///home/orosu/Documents/Repos/gi/exbar/src/TrainingSet.rsc|, false);
 
     APTA::build();
+    print("APTA 0: "); iprintln(APTA::apta0);
     // GraphVis::build();
     exbarSearch();
     GraphVis::build();
+
+    // Build DFA 0
+    /*
+    set[str] Q, // set of states
+    set[str] Z, // set of input symbols
+    str(str nodeId, str edgeLabel) transitionFunction,
+    str s, // start state
+    set[str] F // final states
+    */
+    dfa0 = <
+        {id | id <- APTA::redNodes + APTA::blueNodes},
+        APTA::alphabet,
+        APTA::transitionFunction,
+        APTA::rootId,
+        {id | id <- APTA::redNodes, APTA::redNodes[id] != ""} +
+            {id | id <- APTA::blueNodes, APTA::blueNodes[id] != ""}
+    >;
+    print("DFA 0: "); iprintln(dfa0);
 }
 
 /**
@@ -176,6 +218,8 @@ private bool tryMerge(str redNodeId, str blueNodeId)
 
     // Check if the nodes can be merged
     // If the nodes are connected, merge is not allowed
+    /*
+    //TODO It is not needed, but I am not sure
     if ((redNodeId in nE && blueNodeId in [nodeEdge.destId |
             // Check if the red node has a child relation with the blue node
             tuple[str nodeLabel, str destId] nodeEdge <- nE[redNodeId]]) ||
@@ -186,6 +230,7 @@ private bool tryMerge(str redNodeId, str blueNodeId)
         println("Merge failed! the nodes are connected");
         return false;
     }
+    */
 
     // If the nodes have transitions on a common symbol
     //     that lead to nodes which are not equivalent, merge is not allowed
