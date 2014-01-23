@@ -64,9 +64,9 @@ public void main()
     // TrainingSet::addSampleFromFile(|file:///home/orosu/Documents/Repos/gi/exbar/src/TrainingSet.rsc|, false);
 
     // Build APTA
-    APTA = APTA::build(TrainingSet::build());
+    APTA = APTA::build(TrainingSet::build(), false);
     print("APTA 0: "); iprintln(APTA);
-    // GraphVis::build(APTA);
+    GraphVis::build(APTA);
 
     // EXBAR Search
     exbarSearch();
@@ -184,22 +184,16 @@ private bool tryMerge(str redNodeId, str blueNodeId)
 {
     println("Trying to merge R: <redNodeId> with B: <blueNodeId>...");
 
-    //TODO WTF StackOverflow() otherwise
-    map[str sourceId, set[tuple[str edgeLabel, str destId]
-                               nodeEdge] nodeEdges] nE = APTA@nodeEdges;
-    map[str destId, set[tuple[str edgeLabel, str sourceId]
-                             nodeEdge] nodeEdges] nE2 = APTA@nodeEdges2;
-
     // Check if the nodes can be merged
     // If the nodes are connected, merge is not allowed
     /*
     //TODO It is not needed, but I am not sure
-    if ((redNodeId in nE && blueNodeId in [nodeEdge.destId |
+    if ((redNodeId in APTA@nodeEdges && blueNodeId in [nodeEdge.destId |
             // Check if the red node has a child relation with the blue node
-            tuple[str nodeLabel, str destId] nodeEdge <- nE[redNodeId]]) ||
-        (redNodeId in nE2 && blueNodeId in [nodeEdge.sourceId |
+            tuple[str nodeLabel, str destId] nodeEdge <- APTA@nodeEdges[redNodeId]]) ||
+        (redNodeId in APTA@nodeEdges2 && blueNodeId in [nodeEdge.sourceId |
             // Check if the red node has a parrent relation with the blue node
-            tuple[str nodeLabel, str sourceId] nodeEdge <- nE2[redNodeId]])
+            tuple[str nodeLabel, str sourceId] nodeEdge <- APTA@nodeEdges2[redNodeId]])
     ) {
         println("Merge failed! the nodes are connected");
         return false;
@@ -209,17 +203,15 @@ private bool tryMerge(str redNodeId, str blueNodeId)
     // If the nodes have transitions on a common symbol
     //     that lead to nodes which are not equivalent, merge is not allowed
     //TODO ATTENTION - you may want to rewrite this more elegantly
-    if (redNodeId in nE && blueNodeId in nE) {
+    if (redNodeId in APTA@nodeEdges && blueNodeId in APTA@nodeEdges) {
         // Both nodes have children
         set[tuple[str edgeLabel, str nodeLabel] nodeEdge] redNodesChildren =
-            {<nodeEdge.edgeLabel, nodeEdge.destId in APTA@redNodes ?
-                APTA@redNodes[nodeEdge.destId]: APTA@blueNodes[nodeEdge.destId]> |
-                tuple[str edgeLabel, str destId] nodeEdge <- nE[redNodeId]};
+            {<nodeEdge.edgeLabel, getLabelByNodeId(nodeEdge.destId)> |
+            tuple[str edgeLabel, str destId] nodeEdge <- APTA@nodeEdges[redNodeId]};
         ;
         set[tuple[str edgeLabel, str nodeLabel] nodeEdge] blueNodesChildren =
-            {<nodeEdge.edgeLabel, nodeEdge.destId in APTA@redNodes ?
-                APTA@redNodes[nodeEdge.destId]: APTA@blueNodes[nodeEdge.destId]> |
-                tuple[str edgeLabel, str destId] nodeEdge <- nE[blueNodeId]};
+            {<nodeEdge.edgeLabel, getLabelByNodeId(nodeEdge.destId)> |
+            tuple[str edgeLabel, str destId] nodeEdge <- APTA@nodeEdges[blueNodeId]};
         ;
         for (tuple[str edgeLabel, str nodeLabel] nodeEdgeRed <- redNodesChildren) {
             for (tuple[str edgeLabel, str nodeLabel] nodeEdgeBlue <- blueNodesChildren) {
@@ -235,17 +227,15 @@ private bool tryMerge(str redNodeId, str blueNodeId)
     }
     /*
     //TODO It is not needed, but I am not sure
-    if (redNodeId in nE && blueNodeId in nE2) {
+    if (redNodeId in APTA@nodeEdges && blueNodeId in APTA@nodeEdges2) {
         // Both nodes have parents
         set[tuple[str edgeLabel, str nodeLabel] nodeEdge] redNodesParents =
-            {<nodeEdge.edgeLabel, nodeEdge.sourceId in APTA@redNodes ?
-                APTA@redNodes[nodeEdge.sourceId]: APTA@blueNodes[nodeEdge.sourceId]> |
-                tuple[str edgeLabel, str sourceId] nodeEdge <- nE2[redNodeId]};
+            {<nodeEdge.edgeLabel, getLabelByNodeId(nodeEdge.sourceId)> |
+            tuple[str edgeLabel, str sourceId] nodeEdge <- APTA@nodeEdges2[redNodeId]};
         ;
         set[tuple[str edgeLabel, str nodeLabel] nodeEdge] blueNodesParents =
-            {<nodeEdge.edgeLabel, nodeEdge.sourceId in APTA@redNodes ?
-                APTA@redNodes[nodeEdge.sourceId]: APTA@blueNodes[nodeEdge.sourceId]> |
-                tuple[str edgeLabel, str sourceId] nodeEdge <- nE2[blueNodeId]};
+            {<nodeEdge.edgeLabel, getLabelByNodeId(nodeEdge.sourceId)> |
+            tuple[str edgeLabel, str sourceId] nodeEdge <- APTA@nodeEdges2[blueNodeId]};
         ;
         for (tuple[str edgeLabel, str nodeLabel] nodeEdgeRed <- redNodesParents) {
             for (tuple[str edgeLabel, str nodeLabel] nodeEdgeBlue <- blueNodesParents) {
@@ -262,36 +252,46 @@ private bool tryMerge(str redNodeId, str blueNodeId)
     */
 
     // Get the nodes pointing to the blue node and make them point the red node
-    for (tuple[str labelL, str sourceId] edgeL <- nE2[blueNodeId]) {
+    for (tuple[str labelL, str sourceId] edgeL <- APTA@nodeEdges2[blueNodeId]) {
 
-        nE[edgeL.sourceId] -= {<edgeL.labelL, blueNodeId>};
-        nE[edgeL.sourceId] += {<edgeL.labelL, redNodeId>};
+        APTA@nodeEdges[edgeL.sourceId] -= {<edgeL.labelL, blueNodeId>};
+        APTA@nodeEdges[edgeL.sourceId] += {<edgeL.labelL, redNodeId>};
 
-        nE2[redNodeId] += {<edgeL.labelL, edgeL.sourceId>};
-        nE2[blueNodeId] -= {<edgeL.labelL, edgeL.sourceId>};
+        APTA@nodeEdges2[redNodeId] += {<edgeL.labelL, edgeL.sourceId>};
+        APTA@nodeEdges2[blueNodeId] -= {<edgeL.labelL, edgeL.sourceId>};
     }
 
     // Get the blue nodes' children and make them children of the red node
-    if (blueNodeId in nE) {
-        for (tuple[str label, str destId] edgeL <- nE[blueNodeId]) {
-            if (redNodeId notin nE) {
-                nE += (redNodeId: {edgeL});
+    if (blueNodeId in APTA@nodeEdges) {
+        for (tuple[str label, str destId] edgeL <- APTA@nodeEdges[blueNodeId]) {
+            if (redNodeId notin APTA@nodeEdges) {
+                APTA@nodeEdges += (redNodeId: {edgeL});
             } else {
-                nE[redNodeId] += {edgeL};
+                APTA@nodeEdges[redNodeId] += {edgeL};
             }
-            nE[blueNodeId] -= {edgeL};
+            APTA@nodeEdges[blueNodeId] -= {edgeL};
 
-            nE2[edgeL.destId] += {<edgeL.label, redNodeId>};
-            nE2[edgeL.destId] -= {<edgeL.label, blueNodeId>};
+            APTA@nodeEdges2[edgeL.destId] += {<edgeL.label, redNodeId>};
+            APTA@nodeEdges2[edgeL.destId] -= {<edgeL.label, blueNodeId>};
         }
     }
 
     // Remove blue node
     APTA@blueNodes -= (blueNodeId: "");
 
-    //TODO WTF StackOverflow() otherwise
-    APTA@nodeEdges = nE;
-    APTA@nodeEdges2 = nE2;
-
     return true;
+}
+
+/**
+ * Get Label node by node id
+ */
+private str getLabelByNodeId(str nodeId)
+{
+    if (nodeId in APTA@redNodes) {
+        return APTA@redNodes[nodeId];
+    }
+    if (nodeId in APTA@blueNodes) {
+        return APTA@blueNodes[nodeId]; 
+    }
+    return APTA@whiteNodes[nodeId];
 }

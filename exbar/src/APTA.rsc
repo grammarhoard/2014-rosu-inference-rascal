@@ -50,14 +50,20 @@ anno list[str] APTA@redNodesLabelList;
 anno map[str id, str label] APTA@blueNodes;
 
 /**
- * Map of Edges between nodes Source -> Destination (for both, red and blue)
+ * Map of White Nodes
+ *     Only used by EDSM
+ */
+anno map[str id, str label] APTA@whiteNodes;
+
+/**
+ * Map of Edges between nodes Source -> Destination (all colors)
  * Used to get the children of a node
  */
 anno map[str sourceId, set[tuple[str edgeLabel, str destId]
                            nodeEdge] nodeEdges] APTA@nodeEdges;
 
 /**
- * Map of Edges between nodes Destination -> Source (for both, red and blue)
+ * Map of Edges between nodes Destination -> Source (all colors)
  * Used to get the parrents of a node
  */
 anno map[str destId, set[tuple[str edgeLabel, str sourceId]
@@ -79,6 +85,12 @@ private str rootId = "root";
 private int nodeIdAutoIncrement = 0;
 
 /**
+ * If this parameter is true, the root node is red,
+ *     his first level children are blue and the rest of the nodes are white
+ */
+private bool useWhiteNodes = false;
+
+/**
  * Get an unique node id
  */
 private str getUniqueNodeId()
@@ -97,7 +109,13 @@ private void addNewNode(bool isRed, str newNodeId, str nodeLabel,
         APTA@redNodes += (newNodeId: nodeLabel);
         APTA@redNodesLabelList += nodeLabel;
     } else {
-        APTA@blueNodes += (newNodeId: nodeLabel);
+        if ((useWhiteNodes == true && parentNodeId == rootId) ||
+            useWhiteNodes == false
+        ) {
+            APTA@blueNodes += (newNodeId: nodeLabel);
+        } else {
+            APTA@whiteNodes += (newNodeId: nodeLabel);
+        }
     }
 
     if (parentNodeId != "") {
@@ -132,7 +150,11 @@ private str addPath(str nodeId, str sample, str terminalNodeLabel)
 {
     // Terminal Node
     if (sample == "") {
-        APTA@blueNodes[nodeId] = terminalNodeLabel;
+        if (nodeId in APTA@blueNodes) {
+            APTA@blueNodes[nodeId] = terminalNodeLabel;
+        } else {
+            APTA@whiteNodes[nodeId] = terminalNodeLabel;
+        }
         return nodeId;
     }
 
@@ -173,15 +195,20 @@ private str transitionFunction(str nodeId, str edgeLabel)
 /**
  * Build APTA from Training Set starting with the Root Node
  */
-public APTA build(TrainingS trainingSet)
+public APTA build(TrainingS trainingSet, bool useWhite)
 {
     // APTA init
     APTA = apta();
     APTA@redNodes = ();
     APTA@redNodesLabelList = [];
     APTA@blueNodes = ();
+    APTA@whiteNodes = ();
     APTA@nodeEdges = ();
     APTA@nodeEdges2 = ();
+
+    if (useWhite == true) {
+        useWhiteNodes = true;
+    }
 
     // Start with the root of APTA colored red
     addNewNode(true, rootId, "", "", "");

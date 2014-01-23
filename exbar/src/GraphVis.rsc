@@ -25,7 +25,7 @@ public void build(APTA APTA)
         nodes += ellipse(
             text(APTA@redNodes[nodeId]),
             id(nodeId),
-            mouseOver(box(text(nodeId), fillColor("white"))),
+            mouseOver(box(text(nodeId), fillColor("grey"))),
             size(50),
             fillColor("red")
         );
@@ -34,9 +34,18 @@ public void build(APTA APTA)
         nodes += ellipse(
             text(APTA@blueNodes[nodeId]),
             id(nodeId),
-            mouseOver(box(text(nodeId), fillColor("white"))),
+            mouseOver(box(text(nodeId), fillColor("grey"))),
             size(50),
             fillColor("blue")
+        );
+    }
+    for (str nodeId <- APTA@whiteNodes) {
+        nodes += ellipse(
+            text(APTA@whiteNodes[nodeId]),
+            id(nodeId),
+            mouseOver(box(text(nodeId), fillColor("grey"))),
+            size(50),
+            fillColor("white")
         );
     }
 
