@@ -27,6 +27,26 @@ private int mInf = -2147483648;
 public void main()
 {
     // Add positive and negative samples
+    /*
+    // Sample Set 1
+    TrainingSet::addSample("1",   true);
+    TrainingSet::addSample("110", true);
+    TrainingSet::addSample("01",  true);
+    TrainingSet::addSample("001", true);
+
+    TrainingSet::addSample("00",  false);
+    TrainingSet::addSample("10",  false);
+    TrainingSet::addSample("000", false);
+
+    // Sample Set 2
+    TrainingSet::addSample("1",    true);
+    TrainingSet::addSample("11",   true);
+    TrainingSet::addSample("1111", true);
+
+    TrainingSet::addSample("0",    false);
+    TrainingSet::addSample("101",  false);
+    */
+
     // Sample Set 3
     TrainingSet::addSample("a",    true);
     TrainingSet::addSample("abaa", true);

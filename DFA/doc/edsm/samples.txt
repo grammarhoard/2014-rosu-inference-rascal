@@ -1,0 +1,184 @@
+// Sample Set 1
+TrainingSet::addSample("1",   true);
+TrainingSet::addSample("110", true);
+TrainingSet::addSample("01",  true);
+TrainingSet::addSample("001", true);
+
+TrainingSet::addSample("00",  false);
+TrainingSet::addSample("10",  false);
+TrainingSet::addSample("000", false);
+
+APTA 0: apta()[
+  @nodeEdges2=(
+    "Node-9":{<"0","Node-2">},
+    "Node-8":{<"0","Node-5">},
+    "Node-7":{<"0","Node-6">},
+    "Node-6":{<"1","Node-5">},
+    "Node-5":{<"1","root">},
+    "Node-4":{<"1","Node-1">},
+    "Node-3":{<"1","Node-2">},
+    "Node-2":{<"0","Node-1">},
+    "Node-1":{<"0","root">},
+    "root":{}
+  ),
+  @whiteNodes=("Node-9":"Rejected","Node-8":"Rejected","Node-7":"Accepted","Node-6":"","Node-4":"Accepted","Node-3":"Accepted","Node-2":"Rejected"),
+  @nodeEdges=(
+    "Node-6":{<"0","Node-7">},
+    "Node-5":{
+      <"1","Node-6">,
+      <"0","Node-8">
+    },
+    "Node-2":{
+      <"0","Node-9">,
+      <"1","Node-3">
+    },
+    "Node-1":{
+      <"0","Node-2">,
+      <"1","Node-4">
+    },
+    "root":{
+      <"0","Node-1">,
+      <"1","Node-5">
+    }
+  ),
+  @redNodes=("root":""),
+  @redNodesLabelList=[""],
+  @A=<{"Node-5","Node-1","root"},{"1","0"},str transitionFunction(str, str); ,"root",{"Node-5"},{}>,
+  @blueNodes=("Node-5":"Accepted","Node-1":"")
+]
+B: Node-5 cannot be merged with any red node, so it is promoted to red!
+B: Node-8 cannot be merged with any red node, so it is promoted to red!
+B: Node-6 cannot be merged with any red node, so it is promoted to red!
+Merging R: Node-5 with B: Node-7!
+B: Node-1 cannot be merged with any red node, so it is promoted to red!
+Merging R: Node-5 with B: Node-4!
+Merging R: Node-8 with B: Node-2!
+Merging R: Node-5 with B: Node-3!
+Merging R: Node-8 with B: Node-9!
+APTA: ("Node-8":"Rejected","Node-6":"","Node-5":"Accepted","Node-1":"","root":"")
+sourceId: Node-8; destId: Node-5; label: 1
+sourceId: Node-8; destId: Node-8; label: 0
+sourceId: Node-6; destId: Node-5; label: 0
+sourceId: Node-5; destId: Node-6; label: 1
+sourceId: Node-5; destId: Node-8; label: 0
+sourceId: Node-1; destId: Node-5; label: 1
+sourceId: Node-1; destId: Node-8; label: 0
+sourceId: root; destId: Node-1; label: 0
+sourceId: root; destId: Node-5; label: 1
+DFA 0: dfa()[
+  @A=<{"Node-8","Node-6","Node-5","Node-1","root"},{"1","0"},str transitionFunction(str, str); ,"root",{"Node-8","Node-5"}>
+]
+----------------------------------------
+// Sample Set 2
+TrainingSet::addSample("1",    true);
+TrainingSet::addSample("11",   true);
+TrainingSet::addSample("1111", true);
+
+TrainingSet::addSample("0",    false);
+TrainingSet::addSample("101",  false);
+
+APTA 0: apta()[
+  @nodeEdges2=(
+    "Node-7":{<"1","Node-6">},
+    "Node-6":{<"0","Node-1">},
+    "Node-5":{<"0","root">},
+    "Node-4":{<"1","Node-3">},
+    "Node-3":{<"1","Node-2">},
+    "Node-2":{<"1","Node-1">},
+    "Node-1":{<"1","root">},
+    "root":{}
+  ),
+  @whiteNodes=("Node-7":"Rejected","Node-6":"","Node-4":"Accepted","Node-3":"","Node-2":"Accepted"),
+  @nodeEdges=(
+    "Node-6":{<"1","Node-7">},
+    "Node-3":{<"1","Node-4">},
+    "Node-2":{<"1","Node-3">},
+    "Node-1":{
+      <"1","Node-2">,
+      <"0","Node-6">
+    },
+    "root":{
+      <"1","Node-1">,
+      <"0","Node-5">
+    }
+  ),
+  @redNodes=("root":""),
+  @redNodesLabelList=[""],
+  @A=<{"Node-5","Node-1","root"},{"1","0"},str transitionFunction(str, str); ,"root",{"Node-1"},{"Node-5"}>,
+  @blueNodes=("Node-5":"Rejected","Node-1":"Accepted")
+]
+B: Node-5 cannot be merged with any red node, so it is promoted to red!
+B: Node-1 cannot be merged with any red node, so it is promoted to red!
+B: Node-6 cannot be merged with any red node, so it is promoted to red!
+Merging R: Node-5 with B: Node-7!
+B: Node-2 cannot be merged with any red node, so it is promoted to red!
+Merging R: root with B: Node-3!
+Merging R: Node-2 with B: Node-4!
+APTA: ("Node-6":"","Node-5":"Rejected","Node-2":"Accepted","Node-1":"Accepted","root":"")
+sourceId: Node-6; destId: Node-5; label: 1
+sourceId: Node-2; destId: root; label: 1
+sourceId: Node-1; destId: Node-2; label: 1
+sourceId: Node-1; destId: Node-6; label: 0
+sourceId: root; destId: Node-1; label: 1
+sourceId: root; destId: Node-2; label: 1
+sourceId: root; destId: Node-5; label: 0
+DFA 0: dfa()[
+  @A=<{"Node-6","Node-5","Node-2","Node-1","root"},{"1","0"},str transitionFunction(str, str); ,"root",{"Node-5","Node-2","Node-1"}>
+]
+----------------------------------------
+// Sample Set 3
+TrainingSet::addSample("a",    true);
+TrainingSet::addSample("abaa", true);
+TrainingSet::addSample("bb",   true);
+
+TrainingSet::addSample("abb",  false);
+TrainingSet::addSample("b",    false);
+
+APTA 0: apta()[
+  @nodeEdges2=(
+    "Node-7":{<"b","Node-2">},
+    "Node-6":{<"b","Node-5">},
+    "Node-5":{<"b","root">},
+    "Node-4":{<"a","Node-3">},
+    "Node-3":{<"a","Node-2">},
+    "Node-2":{<"b","Node-1">},
+    "Node-1":{<"a","root">},
+    "root":{}
+  ),
+  @whiteNodes=("Node-7":"Rejected","Node-6":"Accepted","Node-4":"Accepted","Node-3":"","Node-2":""),
+  @nodeEdges=(
+    "Node-5":{<"b","Node-6">},
+    "Node-3":{<"a","Node-4">},
+    "Node-2":{
+      <"a","Node-3">,
+      <"b","Node-7">
+    },
+    "Node-1":{<"b","Node-2">},
+    "root":{
+      <"a","Node-1">,
+      <"b","Node-5">
+    }
+  ),
+  @redNodes=("root":""),
+  @redNodesLabelList=[""],
+  @A=<{"Node-5","Node-1","root"},{"b","a"},str transitionFunction(str, str); ,"root",{"Node-1"},{"Node-5"}>,
+  @blueNodes=("Node-5":"Rejected","Node-1":"Accepted")
+]
+B: Node-5 cannot be merged with any red node, so it is promoted to red!
+B: Node-6 cannot be merged with any red node, so it is promoted to red!
+Merging R: Node-6 with B: Node-1!
+B: Node-2 cannot be merged with any red node, so it is promoted to red!
+Merging R: root with B: Node-3!
+Merging R: Node-6 with B: Node-4!
+Merging R: Node-5 with B: Node-7!
+APTA: ("Node-6":"Accepted","Node-5":"Rejected","Node-2":"","root":"")
+sourceId: Node-6; destId: Node-2; label: b
+sourceId: Node-5; destId: Node-6; label: b
+sourceId: Node-2; destId: root; label: a
+sourceId: Node-2; destId: Node-5; label: b
+sourceId: root; destId: Node-6; label: a
+sourceId: root; destId: Node-5; label: b
+DFA 0: dfa()[
+  @A=<{"Node-6","Node-5","Node-2","root"},{"b","a"},str transitionFunction(str, str); ,"root",{"Node-6","Node-5"}>
+]
+----------------------------------------

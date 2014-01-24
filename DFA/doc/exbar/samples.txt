@@ -7,86 +7,83 @@ TrainingSet::addSample("001", true);
 TrainingSet::addSample("00",  false);
 TrainingSet::addSample("10",  false);
 TrainingSet::addSample("000", false);
------------------------------
-// Before merging
-Red Nodes("root":"")
-Blue Nodes("Node-9":"Rejected","Node-8":"Rejected","Node-7":"Accepted","Node-6":"","Node-5":"Accepted","Node-4":"Accepted","Node-3":"Accepted","Node-2":"Rejected","Node-1":"")
-Node Edges(
-  "Node-6":{<"0","Node-7">},
-  "Node-5":{
-    <"1","Node-6">,
-    <"0","Node-8">
-  },
-  "Node-2":{
-    <"0","Node-9">,
-    <"1","Node-3">
-  },
-  "Node-1":{
-    <"0","Node-2">,
-    <"1","Node-4">
-  },
-  "root":{
-    <"0","Node-1">,
-    <"1","Node-5">
-  }
-)
-Node Edges2(
-  "Node-9":{<"0","Node-2">},
-  "Node-8":{<"0","Node-5">},
-  "Node-7":{<"0","Node-6">},
-  "Node-6":{<"1","Node-5">},
-  "Node-5":{<"1","root">},
-  "Node-4":{<"1","Node-1">},
-  "Node-3":{<"1","Node-2">},
-  "Node-2":{<"0","Node-1">},
-  "Node-1":{<"0","root">},
-  "root":{}
-)
------------------------------
-// After merging
-Red Nodes("Node-9":"Rejected","Node-7":"Accepted","Node-6":"","Node-2":"Rejected","Node-1":"","root":"")
-Blue Nodes()
-Node Edges(
-  "Node-7":{
-    <"0","Node-9">,
-    <"1","Node-6">
-  },
-  "Node-6":{<"0","Node-7">},
-  "Node-5":{},
-  "Node-2":{
-    <"0","Node-9">,
-    <"1","Node-7">
-  },
-  "Node-1":{
-    <"0","Node-2">,
-    <"1","Node-7">
-  },
-  "root":{
-    <"0","Node-1">,
-    <"1","Node-7">
-  }
-)
-Node Edges2(
-  "Node-9":{
-    <"0","Node-2">,
-    <"0","Node-7">
-  },
-  "Node-8":{},
-  "Node-7":{
-    <"1","Node-1">,
-    <"1","Node-2">,
-    <"1","root">,
-    <"0","Node-6">
-  },
-  "Node-6":{<"1","Node-7">},
-  "Node-5":{},
-  "Node-4":{},
-  "Node-3":{},
-  "Node-2":{<"0","Node-1">},
-  "Node-1":{<"0","root">},
-  "root":{}
-)
------------------------------
+
+APTA 0: apta()[
+  @nodeEdges2=(
+    "Node-9":{<"0","Node-2">},
+    "Node-8":{<"0","Node-5">},
+    "Node-7":{<"0","Node-6">},
+    "Node-6":{<"1","Node-5">},
+    "Node-5":{<"1","root">},
+    "Node-4":{<"1","Node-1">},
+    "Node-3":{<"1","Node-2">},
+    "Node-2":{<"0","Node-1">},
+    "Node-1":{<"0","root">},
+    "root":{}
+  ),
+  @whiteNodes=(),
+  @nodeEdges=(
+    "Node-6":{<"0","Node-7">},
+    "Node-5":{
+      <"1","Node-6">,
+      <"0","Node-8">
+    },
+    "Node-2":{
+      <"0","Node-9">,
+      <"1","Node-3">
+    },
+    "Node-1":{
+      <"0","Node-2">,
+      <"1","Node-4">
+    },
+    "root":{
+      <"0","Node-1">,
+      <"1","Node-5">
+    }
+  ),
+  @redNodes=("root":""),
+  @redNodesLabelList=[""],
+  @A=<{"Node-9","Node-8","Node-7","Node-6","Node-5","Node-4","Node-3","Node-2","Node-1","root"},{"1","0"},str transitionFunction(str, str); ,"root",{"Node-7","Node-5","Node-4","Node-3"},{"Node-9","Node-8","Node-2"}>,
+  @blueNodes=("Node-9":"Rejected","Node-8":"Rejected","Node-7":"Accepted","Node-6":"","Node-5":"Accepted","Node-4":"Accepted","Node-3":"Accepted","Node-2":"Rejected","Node-1":"")
+]
+Picked: blueNodeL: <"Node-8","Rejected">
+Trying to merge R: Node-9 with B: Node-8...
+R: Node-9 merged successfully with B: <"Node-8","Rejected">!
+Picked: blueNodeL: <"Node-6","">
+Trying to merge R: root with B: Node-6...
+Merge failed! the nodes have children on a common symbol that lead to nodes which are not equivalent
+Picked: blueNodeL: <"Node-5","Accepted">
+Trying to merge R: Node-7 with B: Node-5...
+R: Node-7 merged successfully with B: <"Node-5","Accepted">!
+Picked: blueNodeL: <"Node-4","Accepted">
+Trying to merge R: Node-7 with B: Node-4...
+R: Node-7 merged successfully with B: <"Node-4","Accepted">!
+Picked: blueNodeL: <"Node-3","Accepted">
+Trying to merge R: Node-7 with B: Node-3...
+R: Node-7 merged successfully with B: <"Node-3","Accepted">!
+Picked: blueNodeL: <"Node-2","Rejected">
+Trying to merge R: Node-9 with B: Node-2...
+R: Node-9 merged successfully with B: <"Node-2","Rejected">!
+Picked: blueNodeL: <"Node-1","">
+Trying to merge R: Node-6 with B: Node-1...
+Merge failed! the nodes have children on a common symbol that lead to nodes which are not equivalent
+Trying to merge R: root with B: Node-1...
+Merge failed! the nodes have children on a common symbol that lead to nodes which are not equivalent
+Solution Found (No blue nodes exist)!
+APTA: ("Node-9":"Rejected","Node-7":"Accepted","Node-6":"","Node-1":"","root":"")
+sourceId: Node-9; destId: Node-9; label: 0
+sourceId: Node-9; destId: Node-7; label: 1
+sourceId: Node-7; destId: Node-9; label: 0
+sourceId: Node-7; destId: Node-6; label: 1
+sourceId: Node-6; destId: Node-7; label: 0
+sourceId: Node-1; destId: Node-9; label: 0
+sourceId: Node-1; destId: Node-7; label: 1
+sourceId: root; destId: Node-1; label: 0
+sourceId: root; destId: Node-7; label: 1
+DFA 0: dfa()[
+  @A=<{"Node-9","Node-7","Node-6","Node-1","root"},{"1","0"},str transitionFunction(str, str); ,"root",{"Node-9","Node-7"}>
+]
+----------------------------------------
 // Sample Set 2
 TrainingSet::addSample("1",    true);
 TrainingSet::addSample("11",   true);
@@ -94,42 +91,67 @@ TrainingSet::addSample("1111", true);
 
 TrainingSet::addSample("0",    false);
 TrainingSet::addSample("101",  false);
------------------------------
-// After merging
-Red Nodes("Node-7":"Rejected","Node-6":"","Node-4":"Accepted","Node-1":"Accepted","root":"")
-Blue Nodes()
-Node Edges(
-  "Node-6":{<"1","Node-7">},
-  "Node-4":{<"1","root">},
-  "Node-3":{},
-  "Node-2":{},
-  "Node-1":{
-    <"1","Node-4">,
-    <"0","Node-6">
-  },
-  "root":{
-    <"1","Node-1">,
-    <"1","Node-4">,
-    <"0","Node-7">
-  }
-)
-Node Edges2(
-  "Node-7":{
-    <"0","root">,
-    <"1","Node-6">
-  },
-  "Node-6":{<"0","Node-1">},
-  "Node-5":{},
-  "Node-4":{
-    <"1","Node-1">,
-    <"1","root">
-  },
-  "Node-3":{},
-  "Node-2":{},
-  "Node-1":{<"1","root">},
-  "root":{<"1","Node-4">}
-)
------------------------------
+
+APTA 0: apta()[
+  @nodeEdges2=(
+    "Node-7":{<"1","Node-6">},
+    "Node-6":{<"0","Node-1">},
+    "Node-5":{<"0","root">},
+    "Node-4":{<"1","Node-3">},
+    "Node-3":{<"1","Node-2">},
+    "Node-2":{<"1","Node-1">},
+    "Node-1":{<"1","root">},
+    "root":{}
+  ),
+  @whiteNodes=(),
+  @nodeEdges=(
+    "Node-6":{<"1","Node-7">},
+    "Node-3":{<"1","Node-4">},
+    "Node-2":{<"1","Node-3">},
+    "Node-1":{
+      <"1","Node-2">,
+      <"0","Node-6">
+    },
+    "root":{
+      <"1","Node-1">,
+      <"0","Node-5">
+    }
+  ),
+  @redNodes=("root":""),
+  @redNodesLabelList=[""],
+  @A=<{"Node-7","Node-6","Node-5","Node-4","Node-3","Node-2","Node-1","root"},{"1","0"},str transitionFunction(str, str); ,"root",{"Node-4","Node-2","Node-1"},{"Node-7","Node-5"}>,
+  @blueNodes=("Node-7":"Rejected","Node-6":"","Node-5":"Rejected","Node-4":"Accepted","Node-3":"","Node-2":"Accepted","Node-1":"Accepted")
+]
+Picked: blueNodeL: <"Node-6","">
+Trying to merge R: root with B: Node-6...
+Merge failed! the nodes have children on a common symbol that lead to nodes which are not equivalent
+Picked: blueNodeL: <"Node-5","Rejected">
+Trying to merge R: Node-7 with B: Node-5...
+R: Node-7 merged successfully with B: <"Node-5","Rejected">!
+Picked: blueNodeL: <"Node-2","Accepted">
+Trying to merge R: Node-4 with B: Node-2...
+R: Node-4 merged successfully with B: <"Node-2","Accepted">!
+Picked: blueNodeL: <"Node-1","Accepted">
+Trying to merge R: Node-4 with B: Node-1...
+Merge failed! the nodes have children on a common symbol that lead to nodes which are not equivalent
+Picked: blueNodeL: <"Node-3","">
+Trying to merge R: Node-6 with B: Node-3...
+Merge failed! the nodes have children on a common symbol that lead to nodes which are not equivalent
+Trying to merge R: root with B: Node-3...
+R: root merged successfully with B: <"Node-3","">!
+Solution Found (No blue nodes exist)!
+APTA: ("Node-7":"Rejected","Node-6":"","Node-4":"Accepted","Node-1":"Accepted","root":"")
+sourceId: Node-6; destId: Node-7; label: 1
+sourceId: Node-4; destId: root; label: 1
+sourceId: Node-1; destId: Node-4; label: 1
+sourceId: Node-1; destId: Node-6; label: 0
+sourceId: root; destId: Node-1; label: 1
+sourceId: root; destId: Node-4; label: 1
+sourceId: root; destId: Node-7; label: 0
+DFA 0: dfa()[
+  @A=<{"Node-7","Node-6","Node-4","Node-1","root"},{"1","0"},str transitionFunction(str, str); ,"root",{"Node-7","Node-4","Node-1"}>
+]
+----------------------------------------
 // Sample Set 3
 TrainingSet::addSample("a",    true);
 TrainingSet::addSample("abaa", true);
@@ -137,80 +159,61 @@ TrainingSet::addSample("bb",   true);
 
 TrainingSet::addSample("abb",  false);
 TrainingSet::addSample("b",    false);
------------------------------
-// Before merging
-Red Nodes("root":"")
-Blue Nodes("Node-7":"Rejected","Node-6":"Accepted","Node-5":"Rejected","Node-4":"Accepted","Node-3":"","Node-2":"","Node-1":"Accepted")
-Node Edges(
-  "Node-5":{<"b","Node-6">},
-  "Node-3":{<"a","Node-4">},
-  "Node-2":{
-    <"a","Node-3">,
-    <"b","Node-7">
-  },
-  "Node-1":{<"b","Node-2">},
-  "root":{
-    <"a","Node-1">,
-    <"b","Node-5">
-  }
-)
------------------------------
-// After first merge
-Red Nodes("Node-7":"Rejected","Node-6":"Accepted","root":"")
-Blue Nodes("Node-4":"Accepted","Node-3":"","Node-2":"","Node-1":"Accepted")
-Node Edges(
-  "Node-7":{<"b","Node-6">},
-  "Node-5":{},
-  "Node-3":{<"a","Node-4">},
-  "Node-2":{
-    <"a","Node-3">,
-    <"b","Node-7">
-  },
-  "Node-1":{<"b","Node-2">},
-  "root":{
-    <"a","Node-1">,
-    <"b","Node-7">
-  }
-)
------------------------------
-// After merging
-Red Nodes("Node-7":"Rejected","Node-6":"Accepted","Node-2":"","root":"")
-Blue Nodes()
-Node Edges(
-  "Node-7":{<"b","Node-6">},
-  "Node-6":{<"b","Node-2">},
-  "Node-5":{},
-  "Node-3":{},
-  "Node-2":{
-    <"a","root">,
-    <"b","Node-7">
-  },
-  "Node-1":{},
-  "root":{
-    <"a","Node-6">,
-    <"b","Node-7">
-  }
-)
-Node Edges2(
-  "Node-7":{
-    <"b","Node-2">,
-    <"b","root">
-  },
-  "Node-6":{
-    <"a","root">,
-    <"b","Node-7">
-  },
-  "Node-5":{},
-  "Node-4":{},
-  "Node-3":{},
-  "Node-2":{<"b","Node-6">},
-  "Node-1":{},
-  "root":{<"a","Node-2">}
-)
+
+APTA 0: apta()[
+  @nodeEdges2=(
+    "Node-7":{<"b","Node-2">},
+    "Node-6":{<"b","Node-5">},
+    "Node-5":{<"b","root">},
+    "Node-4":{<"a","Node-3">},
+    "Node-3":{<"a","Node-2">},
+    "Node-2":{<"b","Node-1">},
+    "Node-1":{<"a","root">},
+    "root":{}
+  ),
+  @whiteNodes=(),
+  @nodeEdges=(
+    "Node-5":{<"b","Node-6">},
+    "Node-3":{<"a","Node-4">},
+    "Node-2":{
+      <"a","Node-3">,
+      <"b","Node-7">
+    },
+    "Node-1":{<"b","Node-2">},
+    "root":{
+      <"a","Node-1">,
+      <"b","Node-5">
+    }
+  ),
+  @redNodes=("root":""),
+  @redNodesLabelList=[""],
+  @A=<{"Node-7","Node-6","Node-5","Node-4","Node-3","Node-2","Node-1","root"},{"b","a"},str transitionFunction(str, str); ,"root",{"Node-6","Node-4","Node-1"},{"Node-7","Node-5"}>,
+  @blueNodes=("Node-7":"Rejected","Node-6":"Accepted","Node-5":"Rejected","Node-4":"Accepted","Node-3":"","Node-2":"","Node-1":"Accepted")
+]
+Picked: blueNodeL: <"Node-5","Rejected">
+Trying to merge R: Node-7 with B: Node-5...
+R: Node-7 merged successfully with B: <"Node-5","Rejected">!
+Picked: blueNodeL: <"Node-4","Accepted">
+Trying to merge R: Node-6 with B: Node-4...
+R: Node-6 merged successfully with B: <"Node-4","Accepted">!
+Picked: blueNodeL: <"Node-3","">
+Trying to merge R: root with B: Node-3...
+R: root merged successfully with B: <"Node-3","">!
+Picked: blueNodeL: <"Node-2","">
+Trying to merge R: root with B: Node-2...
+Merge failed! the nodes have children on a common symbol that lead to nodes which are not equivalent
+Picked: blueNodeL: <"Node-1","Accepted">
+Trying to merge R: Node-6 with B: Node-1...
+R: Node-6 merged successfully with B: <"Node-1","Accepted">!
+Solution Found (No blue nodes exist)!
+APTA: ("Node-7":"Rejected","Node-6":"Accepted","Node-2":"","root":"")
 sourceId: Node-7; destId: Node-6; label: b
 sourceId: Node-6; destId: Node-2; label: b
 sourceId: Node-2; destId: root; label: a
 sourceId: Node-2; destId: Node-7; label: b
 sourceId: root; destId: Node-6; label: a
 sourceId: root; destId: Node-7; label: b
------------------------------
+DFA 0: dfa()[
+  @A=<{"Node-7","Node-6","Node-2","root"},{"b","a"},str transitionFunction(str, str); ,"root",{"Node-7","Node-6"}>
+]
+----------------------------------------

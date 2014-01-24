@@ -34,6 +34,7 @@ private int maxRed = 0;
 public void main()
 {
     // Add positive and negative samples
+    /*
     // Sample Set 1
     TrainingSet::addSample("1",   true);
     TrainingSet::addSample("110", true);
@@ -43,7 +44,7 @@ public void main()
     TrainingSet::addSample("00",  false);
     TrainingSet::addSample("10",  false);
     TrainingSet::addSample("000", false);
-    /*
+
     // Sample Set 2
     TrainingSet::addSample("1",    true);
     TrainingSet::addSample("11",   true);
@@ -52,7 +53,7 @@ public void main()
     TrainingSet::addSample("0",    false);
     TrainingSet::addSample("101",  false);
     */
-    /*
+
     // Sample Set 3
     TrainingSet::addSample("a",    true);
     TrainingSet::addSample("abaa", true);
@@ -60,13 +61,12 @@ public void main()
 
     TrainingSet::addSample("abb",  false);
     TrainingSet::addSample("b",    false);
-    */
     // TrainingSet::addSampleFromFile(|file:///home/orosu/Documents/Repos/gi/exbar/src/TrainingSet.rsc|, false);
 
     // Build APTA
     APTA = APTA::build(TrainingSet::build(), false);
     print("APTA 0: "); iprintln(APTA);
-    GraphVis::build(APTA);
+    // GraphVis::build(APTA);
 
     // EXBAR Search
     exbarSearch();
@@ -202,7 +202,6 @@ private bool tryMerge(str redNodeId, str blueNodeId)
 
     // If the nodes have transitions on a common symbol
     //     that lead to nodes which are not equivalent, merge is not allowed
-    //TODO ATTENTION - you may want to rewrite this more elegantly
     if (redNodeId in APTA@nodeEdges && blueNodeId in APTA@nodeEdges) {
         // Both nodes have children
         set[tuple[str edgeLabel, str nodeLabel] nodeEdge] redNodesChildren =

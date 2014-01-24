@@ -10,6 +10,7 @@
  *     F+ (subset of) Q = final nodes of strings in S+
  *     F- (subset of) Q = final nodes of strings in S-
  * size(A) = |Q| (total number of elements in Q / total number of nodes)
+ * Built on Training Set
  * APTA is built from the beginning in the red-blue framework
  */
 module APTA
@@ -86,7 +87,7 @@ private int nodeIdAutoIncrement = 0;
 
 /**
  * If this parameter is true, the root node is red,
- *     his first level children are blue and the rest of the nodes are white
+ *     its first level children are blue and the rest of the nodes are white
  */
 private bool useWhiteNodes = false;
 
@@ -127,7 +128,7 @@ private void addNewNode(bool isRed, str newNodeId, str nodeLabel,
         }
     }
 
-    //TODO we don't need it, but rascal gives error otherwise
+    //TODO Don't need it but Rascal gives error otherwise
     set[tuple[str nodeLabel, str sourceId] nodeEdge] nodeEdgesL2 = {};
 
     if (edgeLabel != "") {
@@ -160,7 +161,9 @@ private str addPath(str nodeId, str sample, str terminalNodeLabel)
 
     str sampleRest = size(sample) > 1 ? sample[1..] : "";
     str nodeLabelL = size(sampleRest) == 0 ? terminalNodeLabel : "";
-    str nodeIdL = ""; //TODO Don't need it but Rascal gives error otherwise
+
+    //TODO Don't need it but Rascal gives error otherwise
+    str nodeIdL = ""; 
 
     // Check if the first character of the sample exists or not as a path
     if (nodeId notin APTA@nodeEdges || sample[0] notin [nodeEdge.label |
@@ -184,7 +187,7 @@ private str addPath(str nodeId, str sample, str terminalNodeLabel)
 
 /**
  * APTA Transition Function
- * Returns the node id following the specified edge from a specified source node
+ * Returns the node id following the specified edge from a source node
  */
 private str transitionFunction(str nodeId, str edgeLabel)
 {
